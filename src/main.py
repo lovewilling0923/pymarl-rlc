@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import collections
-from os.path import dirname, abspath
+from os.path import dirname, abspath, join
 from copy import deepcopy
 from sacred import Experiment, SETTINGS
 from sacred.observers import FileStorageObserver
@@ -70,6 +70,14 @@ def config_copy(config):
         return deepcopy(config)
 
 
+def parse_command(params, key, default):
+    result = default
+    for _i, _v in enumerate(params):
+        if _v.split("=")[0].strip() == key:
+            result = _v[_v.index('=')+1:].strip()
+            break
+    return result
+
 if __name__ == '__main__':
     params = deepcopy(sys.argv)
 
@@ -89,8 +97,12 @@ if __name__ == '__main__':
 
     # now add all the config to sacred
     ex.add_config(config_dict)
-    gpu_id = "0,1,2"
-    gpu_id = str(parse_command(params, "gpu_id", gpu_id))
+    gpu_id="0"
+    try:
+        map_name = config_dict["gpu_id"]
+        gpu_id = str(parse_command(params, "gpu_id", gpu_id))
+    except:
+        pass
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
     
     map_name = parse_command(params, "env_args.map_name", config_dict['env_args']['map_name'])

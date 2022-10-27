@@ -7,4 +7,4 @@ from .updet_agent import UPDeT
 REGISTRY['updet'] = UPDeT
 
 from .transformer import TransformerAggregationAgent
-REGISTRY['transformer_aggregation'] = TransformerAggregationAgent
+REGISTRY['transformer'] = TransformerAggregationAgent

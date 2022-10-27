@@ -13,4 +13,4 @@ do
 done
 
 
-CUDA_VISIBLE_DEVICES=0 python src/main.py --config=qamix --env-config=sc2 with env_args.map_name=8m seed=0
+python src/main.py --config=qamix --env-config=sc2 gpu_id =0 with env_args.map_name=8m seed=0

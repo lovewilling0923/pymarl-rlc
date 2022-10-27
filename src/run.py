@@ -63,10 +63,20 @@ def run(_run, _config, _log):
                                        width=1)
     _log.info("\n\n" + experiment_params + "\n")
 
+    
+
     try:
         map_name = _config["env_args"]["map_name"]
     except:
         map_name = _config["env_args"]["key"]   
+
+    if map_name not in map_dict:
+        print("the map is not in the dict")
+        return 
+    else:
+        args.ally_num = map_dict[map_name]["ally_num"]
+        args.enemy_num = map_dict[map_name]["enemy_num"]
+        
     alg_name = _config["name"]
     # configure tensorboard logger
     unique_token = "{}__{}".format(args.name, datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))

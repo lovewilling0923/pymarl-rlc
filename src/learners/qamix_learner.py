@@ -9,7 +9,7 @@ from torch.optim import Adam
 from components.standarize_stream import RunningMeanStd
 import numpy as np
 
-class QLearner:
+class QamixLearner:
     def __init__(self, mac, scheme, logger, args):
         self.args = args
         self.mac = mac

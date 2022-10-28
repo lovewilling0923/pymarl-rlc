@@ -8,3 +8,6 @@ REGISTRY['updet'] = UPDeT
 
 from .transformer import TransformerAggregationAgent
 REGISTRY['transformer'] = TransformerAggregationAgent
+
+from .central_rnn_agent import CentralRNNAgent
+REGISTRY['central_rnn'] = CentralRNNAgent

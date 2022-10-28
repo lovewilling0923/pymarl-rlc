@@ -13,7 +13,7 @@ runner: "episode"
 buffer_size: 5000
 
 # update the target network every {} episodes
-target_update_interval_or_tau: 200
+target_update_interval: 200
 
 
 obs_agent_id: False
@@ -26,7 +26,7 @@ standardise_returns: False
 standardise_rewards: True
 
 agent_output_type: "q"
-learner: "q_learner"
+learner: "qatten_learner"
 double_q: True
 mixer: "qatten"
 use_rnn: True

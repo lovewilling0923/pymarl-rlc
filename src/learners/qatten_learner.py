@@ -98,7 +98,7 @@ class QattenLearner:
 
         # Mix
         if self.mixer is not None:
-            if self.mixer.name == 'qatten':
+            if self.mixer == 'qatten':
                 chosen_action_qvals, q_attend_regs, head_entropies = self.mixer(chosen_action_qvals, batch["state"][:, :-1], actions)
                 target_max_qvals, _, _ = self.target_mixer(target_max_qvals, batch["state"][:, 1:], target_next_actions)
             else:
@@ -126,7 +126,7 @@ class QattenLearner:
         masked_td_error = td_error * mask
 
         # Normal L2 loss, take mean over actual data
-        if self.mixer.name == 'qatten':
+        if self.mixer == 'qatten':
             loss = (masked_td_error ** 2).sum() / mask.sum() + q_attend_regs
         else:
             loss = (masked_td_error ** 2).sum() / mask.sum()
@@ -152,7 +152,7 @@ class QattenLearner:
             self.logger.log_stat("td_error_abs", (masked_td_error.abs().sum().item()/mask_elems), t_env)
             self.logger.log_stat("q_taken_mean", (chosen_action_qvals * mask).sum().item()/(mask_elems * self.args.n_agents), t_env)
             self.logger.log_stat("target_mean", (targets * mask).sum().item()/(mask_elems * self.args.n_agents), t_env)
-            if self.mixer.name == 'qatten':
+            if self.mixer == 'qatten':
                 [self.logger.log_stat('head_{}_entropy'.format(h_i), ent.item(), t_env) for h_i, ent in enumerate(head_entropies)]
             self.log_stats_t = t_env
 

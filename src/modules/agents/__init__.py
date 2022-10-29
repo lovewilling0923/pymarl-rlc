@@ -14,3 +14,6 @@ REGISTRY['central_rnn'] = CentralRNNAgent
 
 from .rtc_agent import HistoryRTCs
 REGISTRY["rtcs"] = HistoryRTCs
+
+from .rnn_sd_agent import RNN_SD_Agent
+REGISTRY["rnn_sd"] = RNN_SD_Agent

@@ -13,4 +13,4 @@ do
 done
 
 # demo
-python src/main.py --config=qamix --env-config=sc2 with env_args.map_name=8m gpu_id=0 seed=0
+python src/main.py --config=qmix --env-config=sc2 with env_args.map_name=5m_vs_6m gpu_id=0 t_max=2000000 epsilon_anneal_time=50000 seed=4

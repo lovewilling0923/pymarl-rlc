@@ -168,6 +168,14 @@ def run_sequential(args, logger):
 
     # Learner
     learner = le_REGISTRY[args.learner](mac, buffer.scheme, logger, args)
+    total_mac_params = sum(p.numel() for p in list(mac.agent.parameters()))
+    total_mix_params = sum(p.numel() for p in list(learner.mixer.parameters()))
+    print(total_mac_params+total_mix_params)
+    print(total_mac_params+total_mix_params)
+    print(total_mac_params+total_mix_params)
+    print(total_mac_params+total_mix_params)
+    print(total_mac_params+total_mix_params)
+    print(total_mac_params+total_mix_params)
 
     if args.use_cuda:
         learner.cuda()

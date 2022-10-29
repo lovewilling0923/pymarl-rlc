@@ -128,6 +128,17 @@ def run_sequential(args, logger):
     args.n_agents = env_info["n_agents"]
     args.n_actions = env_info["n_actions"]
     args.state_shape = env_info["state_shape"]
+    args.obs_shape = env_info["obs_shape"]
+    if 'sc2' in args.env:
+        args.unit_dim = runner.env.shield_bits_ally + runner.env.unit_type_bits + 4
+    elif '' in args.env:
+        args.unit_dim = runner.env.x_max * runner.env.y_max
+    print("args.state_shape: ", args.state_shape)
+    print("args.obs_shape: ", args.obs_shape)
+    print("args.n_actions: ", args.n_actions)
+    print("args.n_agents: ", args.n_agents)
+    print("args.unit_dim: ", args.unit_dim)
+
 
     # Default/Base scheme
     scheme = {

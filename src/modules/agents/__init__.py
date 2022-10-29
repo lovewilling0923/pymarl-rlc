@@ -11,3 +11,6 @@ REGISTRY['transformer'] = TransformerAggregationAgent
 
 from .central_rnn_agent import CentralRNNAgent
 REGISTRY['central_rnn'] = CentralRNNAgent
+
+from .rtc_agent import HistoryRTCs
+REGISTRY["rtcs"] = HistoryRTCs

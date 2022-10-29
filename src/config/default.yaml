@@ -18,8 +18,8 @@ gpu_id: "0"
 buffer_cpu_only: True # If true we won't keep all of the replay buffer in vram
 
 # --- Logging options ---
-use_tensorboard: True # Log results to tensorboard
-save_model: False # Save the models to disk
+use_tensorboard: False # Log results to tensorboard
+save_model: True # Save the models to disk
 save_model_interval: 2000000 # Save models after this many timesteps
 checkpoint_path: "" # Load a checkpoint from this path
 evaluate: False # Evaluate model for test_nepisode episodes and quit (no training)
@@ -56,5 +56,6 @@ enemy_num: 5 # number of enemy (5m_vs_6m)
 repeat_id: 1
 label: "default_label"
 training_iters: 1 # Number of times to train after doing $(batch_size_run) episode rollouts
+seed: null
 
 

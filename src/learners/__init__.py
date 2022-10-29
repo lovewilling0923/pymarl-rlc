@@ -10,6 +10,9 @@ from .dmaq_qatten_learner import DMAQ_qattenLearner
 from .shaq_learner import SHAQLearner
 from .sqddpg_learner import SQDDPGLearner
 from .qamix_learner import QamixLearner
+from .cds_learner import CDS_Learner
+
+
 REGISTRY = {}
 
 REGISTRY["q_learner"] = QLearner
@@ -24,3 +27,4 @@ REGISTRY["dmaq_qatten_learner"] = DMAQ_qattenLearner
 REGISTRY["shaq_learner"] = SHAQLearner
 REGISTRY["sqddpg_learner"] = SQDDPGLearner
 REGISTRY["qamix_learner"] = QamixLearner
+REGISTRY["cds_learner"] = CDS_Learner

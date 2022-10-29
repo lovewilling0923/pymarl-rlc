@@ -26,7 +26,11 @@ class BasicMAC:
         return chosen_actions
 
     def forward(self, ep_batch, t, test_mode=False):
-        if self.args.agent not in ['updet', 'transformer']:
+        if self.args.agent in ['rnn_sd']:
+            agent_inputs = self._build_inputs(ep_batch, t)
+            agent_outs, self.hidden_states, local_q = self.agent(agent_inputs, self.hidden_states)
+
+        elif self.args.agent not in ['updet', 'transformer']:
             agent_inputs = self._build_inputs(ep_batch, t)
             avail_actions = ep_batch["avail_actions"][:, t]
             agent_outs, self.hidden_states = self.agent(agent_inputs, self.hidden_states)
@@ -58,7 +62,6 @@ class BasicMAC:
             agent_outs, self.hidden_states = self.agent(agent_inputs,
                                                             self.hidden_states.reshape(-1, 1, self.args.emb),
                                                             self.args.enemy_num, self.args.ally_num)
-
             self.h = self.agent.get_agent_h()
 
         return agent_outs.view(ep_batch.batch_size, self.n_agents, -1)

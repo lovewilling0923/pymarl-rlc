@@ -89,7 +89,7 @@ In BibTeX format:
 
 ```tex
 @article{samvelyan19smac,
-  title = {{The} {StarCraft} {Multi}-{Agent} {Challenge}},
+  title = {The StarCraft Multi-Agent Challenge},
   author = {Mikayel Samvelyan and Tabish Rashid and Christian Schroeder de Witt and Gregory Farquhar and Nantas Nardelli and Tim G. J. Rudner and Chia-Man Hung and Philiph H. S. Torr and Jakob Foerster and Shimon Whiteson},
   journal = {CoRR},
   volume = {abs/1902.04043},
@@ -100,7 +100,8 @@ In BibTeX format:
 @article{liu2022mixrts,
   title={MIXRTs: Toward Interpretable Multi-Agent Reinforcement Learning via Mixing Recurrent Soft Decision Trees},
   author={Liu, Zichuan and Zhu, Yuanyang and Wang, Zhi and Chen, Chunlin},
-  journal={arXiv preprint arXiv:2209.07225},
+  journal = {CoRR},
+  volume = {abs/2209.07225},
   year={2022}
 }
 ```

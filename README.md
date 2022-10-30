@@ -12,14 +12,15 @@ PyMARL-RLC includes implementations of the following algorithms:
 - [**VDN**: Value-Decomposition Networks For Cooperative Multi-Agent Learning](https://arxiv.org/abs/1706.05296) 
 - [**IQL**: Independent Q-Learning](https://arxiv.org/abs/1511.08779)
 - [**QTRAN**: QTRAN: Learning to Factorize with Transformation for Cooperative Multi-Agent Reinforcement Learning](https://arxiv.org/abs/1905.05408)
-- [**WQMIX**: Weighted qmix: Expanding monotonic value function factorisation for deep multi-agent reinforcement learning](https://proceedings.neurips.cc/paper/2020/file/73a427badebe0e32caa2e1fc7530b7f3-Paper.pdf)
-- [**QATTEN**: Qatten: A general framework for cooperative multiagent reinforcement learning](https://arxiv.org/abs/2002.03939)
-- [**QPLEX**: Qplex: Duplex dueling multi-agent q-learning](https://arxiv.org/abs/2008.01062)
-- [**MASAC**: Actor-attention-critic for multi-agent reinforcement learning](http://proceedings.mlr.press/v97/iqbal19a/iqbal19a.pdf)
+- [**WQMIX**: Weighted Qmix: Expanding Monotonic Value Function Factorisation for Deep Multi-Agent Reinforcement Learning](https://proceedings.neurips.cc/paper/2020/file/73a427badebe0e32caa2e1fc7530b7f3-Paper.pdf)
+- [**Qatten**: Qatten: A General Framework for Cooperative Multiagent Reinforcement Learning](https://arxiv.org/abs/2002.03939)
+- [**QPLEX**: Qplex: Duplex Dueling Multi-Agent Q-Learning](https://arxiv.org/abs/2008.01062)
+- [**MASAC**: Actor-Attention-Critic for Multi-Agent Reinforcement Learning](http://proceedings.mlr.press/v97/iqbal19a/iqbal19a.pdf)
 - [**SHAQ**: SHAQ: Incorporating Shapley Value Theory into Multi-Agent Q-Learning](https://arxiv.org/pdf/2105.15013.pdf)
 - [**SQDDPG**: QTRAN: Learning to Factorize with Transformation for Cooperative Multi-Agent Reinforcement Learning](https://arxiv.org/abs/1905.05408)
-- [**UPDET**: Updet: Universal multi-agent reinforcement learning via policy decoupling with transformers](https://arxiv.org/abs/2101.08001)
-- [**MIXRTs**: MIXRTs: Toward Interpretable Multi-Agent Reinforcement Learning via Mixing Recurrent Soft Decision Trees](https://arxiv.org/pdf/2209.07225.pdf)
+- [**UPDET**: Updet: Universal Multi-Agent Reinforcement Learning via Policy Decoupling with Transformers](https://arxiv.org/abs/2101.08001)
+- [**CDS**: Celebrating Diversity in Shared Multi-Agent Reinforcement Learning](https://arxiv.org/abs/2106.02195)
+- [**MIXRTs**: MIXRTs: Toward Interpretable Multi-Agent Reinforcement Learning via Mixing Recurrent Soft Decision Trees](https://arxiv.org/abs/2209.07225)
 
 PyMARL is written in PyTorch and uses [SMAC](https://github.com/oxwhirl/smac) as its environment.
 
@@ -80,11 +81,9 @@ python -m pysc2.bin.play --norender --rgb_minimap_size 0 --replay NAME.SC2Replay
 **Note:** Replays cannot be watched using the Linux version of StarCraft II. Please use either the Mac or Windows version of the StarCraft II client.
 
 
-## Citing PyMARL 
+## Citing PyMARL-RLC 
 
-If you use PyMARL in your research, please cite the [SMAC paper](https://arxiv.org/abs/1902.04043).
-
-*M. Samvelyan, T. Rashid, C. Schroeder de Witt, G. Farquhar, N. Nardelli, T.G.J. Rudner, C.-M. Hung, P.H.S. Torr, J. Foerster, S. Whiteson. The StarCraft Multi-Agent Challenge, CoRR abs/1902.04043, 2019.*
+If you use PyMARL-RLC in your research, please cite the [SMAC paper](https://arxiv.org/abs/1902.04043) and [MIXRTs paper](https://arxiv.org/abs/2209.07225).
 
 In BibTeX format:
 
@@ -95,6 +94,14 @@ In BibTeX format:
   journal = {CoRR},
   volume = {abs/1902.04043},
   year = {2019},
+}
+
+
+@article{liu2022mixrts,
+  title={MIXRTs: Toward Interpretable Multi-Agent Reinforcement Learning via Mixing Recurrent Soft Decision Trees},
+  author={Liu, Zichuan and Zhu, Yuanyang and Wang, Zhi and Chen, Chunlin},
+  journal={arXiv preprint arXiv:2209.07225},
+  year={2022}
 }
 ```
 

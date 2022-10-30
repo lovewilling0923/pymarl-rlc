@@ -81,7 +81,7 @@ def parse_command(params, key, default):
 if __name__ == '__main__':
     params = deepcopy(sys.argv)
     th.set_num_threads(1)
-    
+
     # Get the defaults from default.yaml
     with open(os.path.join(os.path.dirname(__file__), "config", "default.yaml"), "r") as f:
         try:

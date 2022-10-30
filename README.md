@@ -1,17 +1,25 @@
 ```diff
 - Please pay attention to the version of SC2 you are using for your experiments. 
 - Performance is *not* always comparable between versions. 
-- The results in SMAC (https://arxiv.org/abs/1902.04043) use SC2.4.10.
+- The results in PYMARL-RLC use SC2.4.10.
 ```
 
 # Python MARL framework
 
-PyMARL is [WhiRL](http://whirl.cs.ox.ac.uk)'s framework for deep multi-agent reinforcement learning and includes implementations of the following algorithms:
+PyMARL-RLC includes implementations of the following algorithms:
 - [**QMIX**: QMIX: Monotonic Value Function Factorisation for Deep Multi-Agent Reinforcement Learning](https://arxiv.org/abs/1803.11485)
 - [**COMA**: Counterfactual Multi-Agent Policy Gradients](https://arxiv.org/abs/1705.08926)
 - [**VDN**: Value-Decomposition Networks For Cooperative Multi-Agent Learning](https://arxiv.org/abs/1706.05296) 
 - [**IQL**: Independent Q-Learning](https://arxiv.org/abs/1511.08779)
 - [**QTRAN**: QTRAN: Learning to Factorize with Transformation for Cooperative Multi-Agent Reinforcement Learning](https://arxiv.org/abs/1905.05408)
+- [**WQMIX**: Weighted qmix: Expanding monotonic value function factorisation for deep multi-agent reinforcement learning](https://proceedings.neurips.cc/paper/2020/file/73a427badebe0e32caa2e1fc7530b7f3-Paper.pdf)
+- [**QATTEN**: Qatten: A general framework for cooperative multiagent reinforcement learning](https://arxiv.org/abs/2002.03939)
+- [**QPLEX**: Qplex: Duplex dueling multi-agent q-learning](https://arxiv.org/abs/2008.01062)
+- [**MASAC**: Actor-attention-critic for multi-agent reinforcement learning](http://proceedings.mlr.press/v97/iqbal19a/iqbal19a.pdf)
+- [**SHAQ**: SHAQ: Incorporating Shapley Value Theory into Multi-Agent Q-Learning](https://arxiv.org/pdf/2105.15013.pdf)
+- [**SQDDPG**: QTRAN: Learning to Factorize with Transformation for Cooperative Multi-Agent Reinforcement Learning](https://arxiv.org/abs/1905.05408)
+- [**UPDET**: Updet: Universal multi-agent reinforcement learning via policy decoupling with transformers](https://arxiv.org/abs/2101.08001)
+- [**MIXRTs**: MIXRTs: Toward Interpretable Multi-Agent Reinforcement Learning via Mixing Recurrent Soft Decision Trees](https://arxiv.org/pdf/2209.07225.pdf)
 
 PyMARL is written in PyTorch and uses [SMAC](https://github.com/oxwhirl/smac) as its environment.
 
@@ -36,6 +44,7 @@ The requirements.txt file can be used to install the necessary packages into a v
 
 ```shell
 python3 src/main.py --config=qmix --env-config=sc2 with env_args.map_name=2s3z
+python3 src/main.py --config=qmix --env-config=sc2 with env_args.map_name=5m_vs_6m gpu_id=0 t_max=2000000 epsilon_anneal_time=50000 seed=4
 ```
 
 The config files act as defaults for an algorithm or environment. 
@@ -44,14 +53,9 @@ They are all located in `src/config`.
 `--config` refers to the config files in `src/config/algs`
 `--env-config` refers to the config files in `src/config/envs`
 
-To run experiments using the Docker container:
-```shell
-bash run.sh $GPU python3 src/main.py --config=qmix --env-config=sc2 with env_args.map_name=2s3z
-```
 
 All results will be stored in the `Results` folder.
 
-The previous config files used for the SMAC Beta have the suffix `_beta`.
 
 ## Saving and loading learnt models
 
@@ -75,9 +79,6 @@ python -m pysc2.bin.play --norender --rgb_minimap_size 0 --replay NAME.SC2Replay
 
 **Note:** Replays cannot be watched using the Linux version of StarCraft II. Please use either the Mac or Windows version of the StarCraft II client.
 
-## Documentation/Support
-
-Documentation is a little sparse at the moment (but will improve!). Please raise an issue in this repo, or email [Tabish](mailto:tabish.rashid@cs.ox.ac.uk)
 
 ## Citing PyMARL 
 

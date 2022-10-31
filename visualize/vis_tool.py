@@ -28,8 +28,10 @@ def get_num(map):
         load_num = 150
     if smac_map == '2s3z':
         load_num = 150
+    if smac_map == '6h_vs_8z':
+        load_num = 500
     return load_num
-nums = 8
+nums = 5
 
 def smooth(y, radius, mode='two_sided', valid_only=False):
     '''
@@ -164,8 +166,9 @@ def read_file(smac_map, load_num):
             result_data = json.load(f)['test_battle_won_mean']
             result_data = np.array(result_data)[:load_num]
             term_files.append(result_data)
+            print(len(result_data))
+
         term_files = np.array(term_files).T.tolist()
-        print(term_files)
         files[alg_name]=term_files
     return files
 
@@ -201,8 +204,6 @@ def plt_term_mean(smac_map, load_num, files, i, j):
 
             if smac_map == 'MMM2' and alg_name=='mixrts':
                 variance = variance if variance < 0.15 else 0.12
-                print(variance)
-
 
             max_values.append(mean + variance)
             min_values.append(mean - variance)
@@ -220,7 +221,7 @@ def plt_term_mean(smac_map, load_num, files, i, j):
         plt.fill_between(np.arange(len(coll[alg_name])), min_values, max_values,
                          color=colors.to_rgba(colors_map[label], alpha=0.15))
     plt.ylim(-2, 102)
-    plt.xlim(-3, load_num+3)
+    plt.xlim(-2, load_num+2)
 
     plt.xlabel('Steps '+r'${\times }$ 10K')
     plt.ylabel('Test Win Rate %', labelpad=-6.5)
@@ -232,8 +233,8 @@ def plt_term_mean(smac_map, load_num, files, i, j):
 
 
 if __name__ == '__main__':
-    smac_maps = ['3m', '8m', '2s3z', '2s_vs_1sc', '5m_vs_6m', '8m_vs_9m', '3s5z', '6h_vs_8z', 'MMM2']#, 'MMM2'
-    # smac_maps = ['5m_vs_6m',]#, 'MMM2'
+    # smac_maps = ['3m', '8m', '2s3z', '2s_vs_1sc', '5m_vs_6m', '8m_vs_9m', '3s5z', '6h_vs_8z', 'MMM2']#, 'MMM2'
+    smac_maps = ['6h_vs_8z',]#, 'MMM2'
     ax = plt.figure(figsize=(16, 12), dpi=400)
     Grid = plt.GridSpec(3, 3, wspace=0.2, hspace=0.4)
     plt.rcParams.update({'font.size': 15})

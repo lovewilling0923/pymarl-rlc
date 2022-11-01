@@ -50,8 +50,8 @@ class RNN_SD_Agent(nn.Module):
 
             x = F.relu(self.fc1(inputs))
             x = x.reshape(-1, input_shape[2], x.shape[-1])
-
             gru_out, _ = self.rnn(x, hidden_state.to(x.device))
+
             gru_out_c = gru_out.reshape(-1, gru_out.shape[-1])
             q = self.fc2(gru_out_c)
 

@@ -21,6 +21,9 @@ class DiffQ_Learner:
 
         self.last_target_update_episode = 0
 
+        self.n_actions = self.args.n_actions
+        self.n_agents = self.args.n_agents
+
         self.mixer = None
         if args.mixer is not None:
             if args.mixer == "vdn":
@@ -29,12 +32,13 @@ class DiffQ_Learner:
                 self.mixer = QMixer(args)
             else:
                 raise ValueError("Mixer {} not recognised.".format(args.mixer))
-            self.params_mixer = list(self.mixer.parameters())
+            # self.params += list(self.mixer.parameters())
             self.target_mixer = copy.deepcopy(self.mixer)
 
-        self.eval_diff_network = Diffusion(args.rnn_hidden_dim, args.n_actions)
+        self.eval_diff_network = Diffusion(args.rnn_hidden_dim*self.n_agents, args.n_actions)
+        self.target_diff_network = Diffusion(args.rnn_hidden_dim*self.n_agents, args.n_actions)
+        self.params_mixer = list(self.mixer.parameters())
         self.params_mixer += list(self.eval_diff_network.parameters())
-        self.target_diff_network = Diffusion(args.rnn_hidden_dim, args.n_actions)
 
         if self.args.use_cuda:
             self.eval_diff_network.cuda()
@@ -45,15 +49,12 @@ class DiffQ_Learner:
 
         self.optimiser = RMSprop(
             params=self.params, lr=args.lr, alpha=args.optim_alpha, eps=args.optim_eps)
-        self.optimiser_mixer = Adam(params=self.params_mixer, lr=args.lr, eps=args.optim_eps)
+        self.optimiser_diff = Adam(params=self.params_mixer, lr=args.lr, eps=args.optim_eps)
 
         # a little wasteful to deepcopy (e.g. duplicates action selector), but should work for any MAC
         self.target_mac = copy.deepcopy(mac)
 
         self.log_stats_t = -self.args.learner_log_interval - 1
-
-        self.n_actions = self.args.n_actions
-        self.n_agents = self.args.n_agents
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         # Get the relevant quantities
@@ -75,10 +76,24 @@ class DiffQ_Learner:
                             dim=-1).permute(0, 2, 1, 3).to(self.args.device)
 
         mac_out, hidden_store, local_qs = self.mac.agent.forward(
-            input_here.clone().detach(), initial_hidden.clone().detach())
+            input_here.clone().detach(), initial_hidden.clone().detach())   # (bs*n, t, h_dim)
         # (bs, t, n, h_dim)
         hidden_store = hidden_store.reshape(
             -1, input_here.shape[1], hidden_store.shape[-2], hidden_store.shape[-1]).permute(0, 2, 1, 3)
+
+        with th.no_grad():
+            # alone agent obs
+            hidden_store_q = hidden_store.clone().repeat(1, 1, 1, self.n_agents)
+            hidden_store_q = hidden_store_q.reshape(-1, self.n_agents*self.args.rnn_hidden_dim)
+            tau = self.eval_diff_network(hidden_store_q)
+            tau = tau.reshape(-1, mac_out.shape[1], mac_out.shape[2], mac_out.shape[-1])
+
+        mac_out = (tau+mac_out)/2
+        tau_state = hidden_store.clone().repeat(1, 1, self.n_agents, 1)[:, :-1]
+        tau_state = tau_state.reshape(-1, self.n_agents*self.args.rnn_hidden_dim)
+        actions_onehot = actions_onehot.reshape(-1, self.n_actions)
+        loss_d = self.eval_diff_network.loss(actions_onehot, tau_state)
+        loss_d /= batch.max_seq_length
 
         # Pick the Q-Values for the actions taken by each agent
         chosen_action_qvals = th.gather(
@@ -112,82 +127,6 @@ class DiffQ_Learner:
             target_max_qvals = th.gather(target_mac_out, 3, cur_max_actions).squeeze(3)
         else:
             target_max_qvals = target_mac_out.max(dim=3)[0]
-
-        is_test = False
-        if is_test:
-        # Intrinsic Q
-            with th.no_grad():
-                obs = batch["obs"][:, :-1]
-                obs_next = batch["obs"][:, 1:]
-                mask_clone = mask.detach().clone(
-                ).unsqueeze(-2).expand(obs.shape[:-1] + mask.shape[-1:])
-                mask_clone = mask_clone.permute(0, 2, 1, 3)
-                mask_clone = mask_clone.reshape(-1,
-                                                mask_clone.shape[-2], mask_clone.shape[-1])
-                mask_clone = mask_clone.reshape(-1, mask_clone.shape[-1])
-
-                obs_intrinsic = obs.clone().permute(0, 2, 1, 3)
-                obs_intrinsic = obs_intrinsic.reshape(
-                    -1, obs_intrinsic.shape[-2], obs_intrinsic.shape[-1])
-                eval_h_intrinsic = hidden_store.clone().permute(0, 2, 1, 3)
-                eval_h_intrinsic = eval_h_intrinsic.reshape(
-                    -1, eval_h_intrinsic.shape[-2], eval_h_intrinsic.shape[-1])
-                h_cat = th.cat([initial_hidden.reshape(-1, initial_hidden.shape[-1]
-                                                       ).unsqueeze(1), eval_h_intrinsic[:, :-2]], dim=1)
-                add_id = th.eye(self.args.n_agents).to(obs.device).expand([obs.shape[0], obs.shape[1], self.args.n_agents,
-                                                                           self.args.n_agents]).permute(0, 2, 1, 3)
-
-                actions_onehot_clone = actions_onehot.clone().permute(0, 2, 1, 3)
-
-                intrinsic_input_1 = th.cat(
-                    [h_cat, obs_intrinsic,
-                     actions_onehot_clone.reshape(-1, actions_onehot_clone.shape[-2], actions_onehot_clone.shape[-1])],
-                    dim=-1)
-
-                intrinsic_input_2 = th.cat(
-                    [intrinsic_input_1, add_id.reshape(-1, add_id.shape[-2], add_id.shape[-1])], dim=-1)
-
-                intrinsic_input_1 = intrinsic_input_1.reshape(
-                    -1, intrinsic_input_1.shape[-1])
-                intrinsic_input_2 = intrinsic_input_2.reshape(
-                    -1, intrinsic_input_2.shape[-1])
-
-                next_obs_intrinsic = obs_next.clone().permute(0, 2, 1, 3)
-                next_obs_intrinsic = next_obs_intrinsic.reshape(
-                    -1, next_obs_intrinsic.shape[-2], next_obs_intrinsic.shape[-1])
-                next_obs_intrinsic = next_obs_intrinsic.reshape(
-                    -1, next_obs_intrinsic.shape[-1])
-
-                log_p_o = self.target_predict_withoutid.get_log_pi(
-                    intrinsic_input_1, next_obs_intrinsic)
-                log_q_o = self.target_predict_withid.get_log_pi(
-                    intrinsic_input_2, next_obs_intrinsic, add_id.reshape([-1, add_id.shape[-1]]))
-
-                mean_p = th.softmax(mac_out[:, :-1], dim=-1).mean(dim=2)
-                q_pi = th.softmax(self.args.beta1 * mac_out[:, :-1], dim=-1)
-
-                pi_diverge = th.cat(
-                    [(q_pi[:, :, id] * th.log(q_pi[:, :, id] / mean_p)).sum(dim=-
-                                                                            1, keepdim=True) for id in range(self.args.n_agents)],
-                    dim=-1).permute(0, 2, 1).unsqueeze(-1)
-
-                intrinsic_rewards = self.args.beta1 * log_q_o - log_p_o
-                intrinsic_rewards = intrinsic_rewards.reshape(
-                    -1, obs_intrinsic.shape[1], intrinsic_rewards.shape[-1])
-                intrinsic_rewards = intrinsic_rewards.reshape(
-                    -1, obs.shape[2], obs_intrinsic.shape[1], intrinsic_rewards.shape[-1])
-                intrinsic_rewards = intrinsic_rewards + self.args.beta2 * pi_diverge
-
-                if self.args.anneal:
-                    if t_env > 1000000:
-                        intrinsic_rewards = max(
-                            1 - self.args.anneal_rate * (t_env - 1000000) / 1000000, 0) * intrinsic_rewards
-
-                # update predict network
-                add_id = add_id.reshape([-1, add_id.shape[-1]])
-                for index in BatchSampler(SubsetRandomSampler(range(intrinsic_input_1.shape[0])), 256, False):
-                    self.eval_diff_network.update(
-                        intrinsic_input_1[index], next_obs_intrinsic[index], mask_clone[index])
 
         # Mix
         if self.mixer is not None:
@@ -226,15 +165,21 @@ class DiffQ_Learner:
         norm_loss = F.l1_loss(local_qs, target=th.zeros_like(
             local_qs), size_average=True)
         loss += norm_loss / 10
+        loss += loss_d*0.0001
 
         # Optimise
         self.optimiser.zero_grad()
-        self.optimiser_mixer.zero_grad()
+        self.optimiser_diff.zero_grad()
         loss.backward()
         grad_norm = th.nn.utils.clip_grad_norm_(self.params, self.args.grad_norm_clip)
-        grad_norm_mixer = th.nn.utils.clip_grad_norm_(self.params_mixer, self.args.grad_norm_clip)
+        grad_norm_diff = th.nn.utils.clip_grad_norm_(self.params_mixer, self.args.grad_norm_clip)
         self.optimiser.step()
-        self.optimiser_mixer.step()
+        self.optimiser_diff.step()
+
+        # self.optimiser_diff.zero_grad()
+        # loss_d.backward()
+        # grad_norm_diff = th.nn.utils.clip_grad_norm_(self.params_diff, self.args.grad_norm_clip)
+        # self.optimiser_diff.step()
 
         if (episode_num - self.last_target_update_episode) / self.args.target_update_interval >= 1.0:
             self._update_targets()
@@ -243,7 +188,7 @@ class DiffQ_Learner:
         if t_env - self.log_stats_t >= self.args.learner_log_interval:
             self.logger.log_stat("loss", loss.item(), t_env)
             self.logger.log_stat("grad_norm", grad_norm, t_env)
-            self.logger.log_stat("grad_norm_mixer", grad_norm_mixer, t_env)
+            self.logger.log_stat("grad_norm_diff", grad_norm_diff, t_env)
             mask_elems = mask.sum().item()
             self.logger.log_stat("td_error_abs", (masked_td_error.abs().sum().item()/mask_elems), t_env)
             self.logger.log_stat("q_taken_mean", (chosen_action_qvals * mask).sum().item()/(mask_elems * self.args.n_agents), t_env)

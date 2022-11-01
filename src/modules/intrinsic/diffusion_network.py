@@ -192,13 +192,15 @@ class Diffusion(nn.Module):
 
         x_recon = self.model(x_noisy, t, state)
         assert noise.shape == x_recon.shape
-        if self.is_dis:
-            a_recon = F.softmax(x_recon, dim=-1)
-            loss = F.cross_entropy(a_recon.view(-1,), a_start.view(-1,))
-        elif self.predict_epsilon:
-            loss = self.loss_fn(x_recon, noise, weights)
-        else:
-            loss = self.loss_fn(x_recon, a_start, weights)
+        # if self.is_dis:
+        #     a_recon = F.softmax(x_recon, dim=-1)
+        #     loss = F.cross_entropy(a_recon.view(-1,), a_start.view(-1,))
+        # el
+        # if self.predict_epsilon:
+        #     loss = self.loss_fn(x_recon, noise, weights)
+        # else:
+        #     loss = self.loss_fn(x_recon, a_start, weights)
+        loss = self.loss_fn(x_recon, a_start, weights)
         return loss
 
     def loss(self, x, state, weights=1.0):

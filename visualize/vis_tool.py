@@ -15,7 +15,7 @@ colors_map = {
 }
 
 _term = 'win_rates'    # win_rates or episode_rewards
-algs = ['vdn', 'qmix', 'qtran', 'qplex', 'mixrts']
+algs = ['vdn', 'qmix', 'qtran', 'qplex']
 q_tree_depth = 3
 mix_q_tree_depth = 3
 beta = 0
@@ -212,9 +212,9 @@ def plt_term_mean(smac_map, load_num, files, i, j):
         max_idx = np.argmax(mean_values)
         min_idx = np.argmin(mean_values)
         x = np.arange(len(coll[alg_name]))
-        y = smooth(mean_values, radius=1)*100
-        min_values = smooth(min_values, radius=2)*100
-        max_values = smooth(max_values, radius=2)*100
+        y = smooth(mean_values, radius=2)*100
+        min_values = smooth(min_values, radius=3)*100
+        max_values = smooth(max_values, radius=3)*100
         # x, y, counts = symmetric_ema(x, y, x[0], x[-1], resample, decay_steps=smooth_step)
 
         plt.plot(x, y, linewidth=2.0, label=label, color=colors_map[label])
@@ -234,7 +234,7 @@ def plt_term_mean(smac_map, load_num, files, i, j):
 
 if __name__ == '__main__':
     # smac_maps = ['3m', '8m', '2s3z', '2s_vs_1sc', '5m_vs_6m', '8m_vs_9m', '3s5z', '6h_vs_8z', 'MMM2']#, 'MMM2'
-    smac_maps = ['6h_vs_8z',]#, 'MMM2'
+    smac_maps = ['5m_vs_6m',]#, 'MMM2'
     ax = plt.figure(figsize=(16, 12), dpi=400)
     Grid = plt.GridSpec(3, 3, wspace=0.2, hspace=0.4)
     plt.rcParams.update({'font.size': 15})

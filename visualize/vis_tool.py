@@ -201,9 +201,9 @@ def plt_term_mean(smac_map, load_num, files, i, j):
             mean = sum(val) / len(val)
             mean_values.append(mean)
             variance = np.std(val)#/(np.sqrt(len(val)))
-
-            if smac_map == 'MMM2' and alg_name=='mixrts':
-                variance = variance if variance < 0.15 else 0.12
+            #
+            # if smac_map == 'MMM2' and alg_name=='mixrts':
+            #     variance = variance if variance < 0.15 else 0.12
 
             max_values.append(mean + variance)
             min_values.append(mean - variance)

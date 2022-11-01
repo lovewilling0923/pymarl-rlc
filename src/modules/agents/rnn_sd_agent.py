@@ -33,7 +33,6 @@ class RNN_SD_Agent(nn.Module):
         input_shape = inputs.shape
 
         if len(input_shape) == 2:
-
             x = F.relu(self.fc1(inputs))
             x = x.unsqueeze(1)
             #h_in = hidden_state.reshape(-1, self.args.rnn_hidden_dim)

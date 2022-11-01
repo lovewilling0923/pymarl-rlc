@@ -35,7 +35,6 @@ class SHAQLearner:
 
         self.log_stats_t = -self.args.learner_log_interval - 1
 
-
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         # Get the relevant quantities
         rewards = batch["reward"][:, :-1]

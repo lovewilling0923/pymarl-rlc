@@ -130,5 +130,10 @@ dmypy.json
 
 # delete result
 /.idea/
-/results/
+/results/models/
+/results/sacred/*/*/_sources/
+/results/sacred/*/*/*/*.txt
+/results/sacred/*/*/*/metrics.json
+/results/sacred/*/*/*/run.json
+/results/sacred/6h_vs_8z/
 nohup.out

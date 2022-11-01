@@ -234,7 +234,7 @@ def plt_term_mean(smac_map, load_num, files, i, j):
 
 if __name__ == '__main__':
     # smac_maps = ['3m', '8m', '2s3z', '2s_vs_1sc', '5m_vs_6m', '8m_vs_9m', '3s5z', '6h_vs_8z', 'MMM2']#, 'MMM2'
-    smac_maps = ['5m_vs_6m',]#, 'MMM2'
+    smac_maps = ['5m_vs_6m', '6h_vs_8z']#, 'MMM2'
     ax = plt.figure(figsize=(16, 12), dpi=400)
     Grid = plt.GridSpec(3, 3, wspace=0.2, hspace=0.4)
     plt.rcParams.update({'font.size': 15})

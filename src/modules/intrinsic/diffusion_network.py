@@ -42,14 +42,13 @@ class MLP(nn.Module):
 class Diffusion(nn.Module):
     def __init__(self, state_dim, action_dim, max_action=2,
                  beta_schedule='linear', n_timesteps=16,
-                 loss_type='l2', clip_denoised=True, predict_epsilon=True):
+                 loss_type='l2', clip_denoised=False, predict_epsilon=True):
         super(Diffusion, self).__init__()
 
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.max_action = max_action
         self.model = MLP(state_dim, action_dim)
-        self.is_dis = True
 
         if beta_schedule == 'linear':
             betas = linear_beta_schedule(n_timesteps)
@@ -123,7 +122,7 @@ class Diffusion(nn.Module):
         if self.clip_denoised:
             x_recon.clamp_(-self.max_action, self.max_action)
         else:
-            assert RuntimeError()
+            pass
 
         model_mean, posterior_variance, posterior_log_variance = self.q_posterior(x_start=x_recon, x_t=x, t=t)
         return model_mean, posterior_variance, posterior_log_variance
@@ -169,7 +168,11 @@ class Diffusion(nn.Module):
         batch_size = state.shape[0]
         shape = (batch_size, self.action_dim)
         action = self.p_sample_loop(state, shape, *args, **kwargs)
-        return action.clamp_(-self.max_action, self.max_action)
+        if self.clip_denoised:
+            action = action.clamp_(-self.max_action, self.max_action)
+        else:
+            pass
+        return action
 
     # ------------------------------------------ training ------------------------------------------#
 
@@ -200,7 +203,9 @@ class Diffusion(nn.Module):
         #     loss = self.loss_fn(x_recon, noise, weights)
         # else:
         #     loss = self.loss_fn(x_recon, a_start, weights)
-        loss = self.loss_fn(x_recon, a_start, weights)
+        a_recon = F.softmax(x_recon, dim=-1)
+
+        loss = self.loss_fn(a_recon, a_start, weights)
         return loss
 
     def loss(self, x, state, weights=1.0):

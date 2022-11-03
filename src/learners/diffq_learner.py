@@ -83,15 +83,17 @@ class DiffQ_Learner:
 
         with th.no_grad():
             # alone agent obs
-            hidden_store_q = hidden_store.clone().repeat(1, 1, 1, self.n_agents)
-            hidden_store_q = hidden_store_q.reshape(-1, self.n_agents*self.args.rnn_hidden_dim)
+            hidden_store_q = hidden_store.clone().reshape(-1, self.args.rnn_hidden_dim).repeat(1, self.n_agents)
+            hidden_store_q = hidden_store_q.view(-1, self.n_agents*self.args.rnn_hidden_dim)
             tau = self.eval_diff_network(hidden_store_q)
             tau = tau.reshape(-1, mac_out.shape[1], mac_out.shape[2], mac_out.shape[-1])
 
-        mac_out = (tau+mac_out)/2
+        beta = 0.5
+        mac_out = (1 - beta)*tau + beta*mac_out
         tau_state = hidden_store.clone().repeat(1, 1, self.n_agents, 1)[:, :-1]
         tau_state = tau_state.reshape(-1, self.n_agents*self.args.rnn_hidden_dim)
         actions_onehot = actions_onehot.reshape(-1, self.n_actions)
+
         loss_d = self.eval_diff_network.loss(actions_onehot, tau_state)
         loss_d /= batch.max_seq_length
 
@@ -111,10 +113,18 @@ class DiffQ_Learner:
         initial_hidden_target = self.target_mac.hidden_states.clone().detach()
         initial_hidden_target = initial_hidden_target.reshape(
             -1, initial_hidden_target.shape[-1]).to(self.args.device)
-        target_mac_out, _, _ = self.target_mac.agent.forward(
+        target_mac_out, target_hidden_store, _ = self.target_mac.agent.forward(
             input_here.clone().detach(), initial_hidden_target.clone().detach())
-        target_mac_out = target_mac_out[:, 1:]
 
+        with th.no_grad():
+            # alone agent obs
+            hidden_store_q = target_hidden_store.clone().reshape(-1, self.args.rnn_hidden_dim).repeat(1, self.n_agents)
+            hidden_store_q = hidden_store_q.view(-1, self.n_agents*self.args.rnn_hidden_dim)
+            target_tau = self.target_diff_network(hidden_store_q)
+            target_tau = target_tau.reshape(-1, target_mac_out.shape[1], target_mac_out.shape[2], target_mac_out.shape[-1])
+        target_mac_out = (1 - beta)*target_tau + beta*target_mac_out
+
+        target_mac_out = target_mac_out[:, 1:]
         # Mask out unavailable actions
         target_mac_out[avail_actions[:, 1:] == 0] = -9999999
 
@@ -165,7 +175,7 @@ class DiffQ_Learner:
         norm_loss = F.l1_loss(local_qs, target=th.zeros_like(
             local_qs), size_average=True)
         loss += norm_loss / 10
-        loss += loss_d*0.0001
+        loss += loss_d*0.001
 
         # Optimise
         self.optimiser.zero_grad()
@@ -175,11 +185,6 @@ class DiffQ_Learner:
         grad_norm_diff = th.nn.utils.clip_grad_norm_(self.params_mixer, self.args.grad_norm_clip)
         self.optimiser.step()
         self.optimiser_diff.step()
-
-        # self.optimiser_diff.zero_grad()
-        # loss_d.backward()
-        # grad_norm_diff = th.nn.utils.clip_grad_norm_(self.params_diff, self.args.grad_norm_clip)
-        # self.optimiser_diff.step()
 
         if (episode_num - self.last_target_update_episode) / self.args.target_update_interval >= 1.0:
             self._update_targets()

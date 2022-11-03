@@ -11,7 +11,7 @@ class RNN_SD_Agent(nn.Module):
         self.n_agents = args.n_agents
 
         self.fc1 = nn.Linear(input_shape, args.rnn_hidden_dim)
-        self.rnn = self.rnn = nn.GRU(
+        self.rnn = nn.GRU(
             input_size=args.rnn_hidden_dim,
             num_layers=1,
             hidden_size=args.rnn_hidden_dim,

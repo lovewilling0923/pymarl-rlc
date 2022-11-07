@@ -30,11 +30,8 @@ def get_num(map):
         load_num = 100
     if smac_map == '2s3z':
         load_num = 150
-<<<<<<< HEAD
     if smac_map == '6h_vs_8z' or smac_map == '3s5z_vs_3s6z' or smac_map == 'corridor':
         load_num = 500
-=======
->>>>>>> parent of 01150f7 (.)
     return load_num
 nums = 8
 

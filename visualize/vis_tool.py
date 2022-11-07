@@ -18,8 +18,8 @@ colors_map = {
 }
 
 _term = 'win_rates'    # win_rates or episode_rewards
-algs = ['vdn', 'qmix', 'qtran', 'qplex', 'ow_qmix', 'cw_qmix', 'cds', 'shaq']
-# algs = ['vdn', 'qmix', 'qtran', 'qplex']
+# algs = ['vdn', 'qmix', 'qtran', 'qplex', 'ow_qmix', 'cw_qmix', 'cds', 'shaq']
+algs = ['vdn', 'qmix', 'qtran', 'qplex']
 q_tree_depth = 3
 mix_q_tree_depth = 3
 beta = 0

@@ -201,6 +201,7 @@ class StagHunt(MultiAgentEnv):
 
     def step(self, actions):
         """ Execute a*bs actions in the environment. """
+        actions = actions.cpu()
         if not self.batch_mode:
             actions = np.expand_dims(np.asarray(actions, dtype=int_type), axis=1)
         assert len(actions.shape) == 2 and actions.shape[0] == self.n_agents and actions.shape[1] == self.batch_size, \

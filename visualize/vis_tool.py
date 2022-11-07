@@ -35,6 +35,7 @@ def get_num(map):
     return load_num
 nums = 5
 
+
 def smooth(y, radius, mode='two_sided', valid_only=False):
     '''
     Smooth signal y, where radius is determines the size of the window

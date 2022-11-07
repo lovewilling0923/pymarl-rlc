@@ -12,5 +12,7 @@ do
    done
 done
 
-# demo
-python src/main.py --config=qmix --env-config=sc2 with env_args.map_name=5m_vs_6m gpu_id=0 t_max=2000000 epsilon_anneal_time=50000 seed=4
+# demo sc2
+python src/main.py --config=qmix --env-config=sc2 with env_args.map_name=5m_vs_6m gpu_id=0 t_max=2010000 epsilon_anneal_time=50000 seed=1
+# demo pp
+python3 src/main.py --config=mixrts --env-config=stag_hunt with env_args.map_name=pp-2 env_args.miscapture_punishment=-2 gpu_id=1

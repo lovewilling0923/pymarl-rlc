@@ -7,15 +7,19 @@ plt.rcParams.update({'font.size': 15})
 
 colors_map = {
     'QPLEX': '#F0E442',
-    'QMIX': '#0072B2',
-    'MIXRTs (ours)': 'red',
-    'VDN': 'g',
+    'QMIX': '#4169E1',
+    'VDN': '#208A20',
     'QTRAN': '#CC79A7',
-    'QNAM': 'b'
+    'SHAQ': '#D8A014',
+    'OW-QMIX': '#4B0082',
+    'CW-QMIX': '#9D4C26',
+    'CDS': '#666666',
+    'MIXRTs (ours)': 'red',
 }
 
 _term = 'win_rates'    # win_rates or episode_rewards
-algs = ['vdn', 'qmix', 'qtran', 'qplex']
+algs = ['vdn', 'qmix', 'qtran', 'qplex', 'ow_qmix', 'cw_qmix', 'cds', 'shaq']
+# algs = ['vdn', 'qmix', 'qtran', 'qplex']
 q_tree_depth = 3
 mix_q_tree_depth = 3
 beta = 0
@@ -26,7 +30,7 @@ def get_num(map):
         load_num = 100
     if smac_map == '2s3z':
         load_num = 150
-    if smac_map == '6h_vs_8z' or smac_map == '3s5z_vs_3s6z':
+    if smac_map == '6h_vs_8z' or smac_map == '3s5z_vs_3s6z' or smac_map == 'corridor':
         load_num = 500
     return load_num
 nums = 5
@@ -183,10 +187,18 @@ def plt_term_mean(smac_map, load_num, files, i, j):
             label = 'QTRAN'
         elif alg_name == 'qplex':
             label = 'QPLEX'
-        elif alg_name == 'mixrts' or alg_name== "mixrts_wo_sm":
+        elif alg_name == 'mixrts':
             label = 'MIXRTs (ours)'
+        elif alg_name == 'ow_qmix':
+            label = 'OW-QMIX'
+        elif alg_name == 'cw_qmix':
+            label = 'CW-QMIX'
         elif alg_name == 'vdn':
             label = 'VDN'
+        elif alg_name == 'shaq':
+            label = 'SHAQ'
+        elif alg_name == 'cds':
+            label = 'CDS'
         elif alg_name == 'gam_qmix':
             label = 'QNAM'
         # logger = Logger(exp_name=alg_name, env_name=smac_map,)
@@ -218,10 +230,20 @@ def plt_term_mean(smac_map, load_num, files, i, j):
         plt.plot(x, y, linewidth=2.0, label=label, color=colors_map[label])
         plt.fill_between(np.arange(len(coll[alg_name])), min_values, max_values,
                          color=colors.to_rgba(colors_map[label], alpha=0.15))
-    plt.ylim(-2, 102)
-    plt.xlim(-2, load_num+2)
+    plt.ylim(-2, 101)
+    plt.xlim(-2, load_num+1)
+    plt.yticks((range(0, 101, 20)))
+    if load_num==200:
+        plt.xticks((range(0, len(coll[alg_name]) + 3, 50)), ("0", "0.50", "1.00", "1.50", "2.00"))
 
-    plt.xlabel('Steps '+r'${\times }$ 10K')
+    if load_num==500:
+        plt.xticks((range(0, len(coll[alg_name])+1, 100)), ("0", "1.00", "2.00", "3.00", "4.00", "5.00"))
+        # plt.yticks((range(0, 52, 10)))
+        # plt.ylim(-2, 52)
+        plt.ylabel('Test Win Rate %', labelpad=-0.5)
+
+    # plt.xlabel('Steps '+r'${\times }$ 10K')
+    plt.xlabel('T (mil)')
     plt.ylabel('Test Win Rate %', labelpad=-6.5)
     plt.rcParams.update({'font.size': 15})
     plt.title(smac_map)
@@ -230,8 +252,8 @@ def plt_term_mean(smac_map, load_num, files, i, j):
 
 
 if __name__ == '__main__':
-    # smac_maps = ['3m', '8m', '2s3z', '2s_vs_1sc', '5m_vs_6m', '8m_vs_9m', '3s5z', '6h_vs_8z', 'MMM2']#, 'MMM2'
-    smac_maps = ['5m_vs_6m', '6h_vs_8z', '3s_vs_5z', '8m_vs_9m', '8m', '2s_vs_1sc', '2c_vs_64zg']#, 'MMM2'
+    # smac_maps = ['8m', '2s_vs_1sc', '8m_vs_9m', '2c_vs_64zg', '5m_vs_6m', '3s_vs_5z', 'MMM2', '3s5z_vs_3s6z', '6h_vs_8z']#
+    smac_maps = ['8m', '5m_vs_6m', 'MMM2', '3s_vs_5z']#
     ax = plt.figure(figsize=(16, 12), dpi=400)
     Grid = plt.GridSpec(3, 3, wspace=0.2, hspace=0.4)
     plt.rcParams.update({'font.size': 15})
@@ -239,11 +261,11 @@ if __name__ == '__main__':
     for i, smac_map in enumerate(smac_maps):
         load_num = get_num(smac_map)
         files = read_file(smac_map, load_num)
-        ax = plt_term_mean(smac_map,load_num, files,int(i/3), int(i%3))
+        ax = plt_term_mean(smac_map,load_num, files, int(i/3), int(i%3))
         ax.grid(True, alpha=0.3, linestyle='-.')
 
     plt.tight_layout()
     handles, labels = ax.get_legend_handles_labels()
-    plt.legend(handles, labels, ncol=6, bbox_to_anchor=(0.5, 2.2))
+    plt.legend(handles, labels, ncol=5, bbox_to_anchor=(0.5, 2.2))
     plt.savefig('./overview_results.pdf',bbox_inches='tight')
     # plt.show()

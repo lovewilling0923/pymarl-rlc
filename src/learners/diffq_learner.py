@@ -4,9 +4,8 @@ import numpy as np
 import torch as th
 import torch.nn.functional as F
 from components.episode_buffer import EpisodeBatch
-from modules.mixers.vdn import VDNMixer
-from modules.mixers.qmix import QMixer
-from modules.intrinsic.diffusion_network import Diffusion
+from modules.mixers.qnam import QNAMer
+from modules.intrinsic.diffusion_network import Diffusion, VAE
 from torch.utils.data.sampler import BatchSampler, SubsetRandomSampler
 from torch.optim import RMSprop, Adam
 
@@ -26,17 +25,15 @@ class DiffQ_Learner:
 
         self.mixer = None
         if args.mixer is not None:
-            if args.mixer == "vdn":
-                self.mixer = VDNMixer()
-            elif args.mixer == "qmix":
-                self.mixer = QMixer(args)
+            if args.mixer == "qnam":
+                self.mixer = QNAMer(args)
             else:
                 raise ValueError("Mixer {} not recognised.".format(args.mixer))
             # self.params += list(self.mixer.parameters())
             self.target_mixer = copy.deepcopy(self.mixer)
 
-        self.eval_diff_network = Diffusion(args.rnn_hidden_dim*self.n_agents, args.n_actions)
-        self.target_diff_network = Diffusion(args.rnn_hidden_dim*self.n_agents, args.n_actions)
+        self.eval_diff_network = VAE(args.rnn_hidden_dim, args.obs_shape)
+        self.target_diff_network = VAE(args.rnn_hidden_dim, args.obs_shape)
         self.params_mixer = list(self.mixer.parameters())
         self.params_mixer += list(self.eval_diff_network.parameters())
 
@@ -81,32 +78,23 @@ class DiffQ_Learner:
         hidden_store = hidden_store.reshape(
             -1, input_here.shape[1], hidden_store.shape[-2], hidden_store.shape[-1]).permute(0, 2, 1, 3)
 
+        input_var_here = batch["obs"][:, :-1]
+        recon, mean, std = self.eval_diff_network(hidden_store[:, :-1])
+        output_vae_here = th.einsum("btnd, btnd->btnd", recon, input_var_here)
+        recon_loss = F.mse_loss(output_vae_here, input_var_here)
+        KL_loss = -0.5 * (1 + th.log(std.pow(2)) - mean.pow(2) - std.pow(2)).mean()
+        # entropy_loss = - (recon * th.log2(recon)).sum(-1).mean()/self.n_agents
+        entropy_loss = F.l1_loss(recon, target=th.zeros_like(recon), size_average=True)
+        vae_loss = 0.5 * recon_loss + KL_loss + 0.7 * entropy_loss
+
+        #vae_loss /= batch.max_seq_length
+
         with th.no_grad():
-            # alone agent obs
-            hidden_store_q = hidden_store.clone().reshape(-1, self.args.rnn_hidden_dim).repeat(1, self.n_agents)
-            hidden_store_q = hidden_store_q.view(-1, self.n_agents*self.args.rnn_hidden_dim)
-            tau = self.eval_diff_network(hidden_store_q)
-            tau = tau.reshape(-1, mac_out.shape[1], mac_out.shape[2], mac_out.shape[-1])
-
-        beta = 0.5
-        mac_out = (1 - beta)*tau + beta*mac_out
-        tau_state = hidden_store.clone().repeat(1, 1, self.n_agents, 1)[:, :-1]
-        tau_state = tau_state.reshape(-1, self.n_agents*self.args.rnn_hidden_dim)
-        actions_onehot = actions_onehot.reshape(-1, self.n_actions)
-
-        loss_d = self.eval_diff_network.loss(actions_onehot, tau_state)
-        loss_d /= batch.max_seq_length
+            latent, _, _ = self.eval_diff_network.encode(hidden_store[:, :-1])
 
         # Pick the Q-Values for the actions taken by each agent
         chosen_action_qvals = th.gather(
             mac_out[:, :-1], dim=3, index=actions).squeeze(3)  # Remove the last dim
-
-        x_mac_out = mac_out.clone().detach()
-        x_mac_out[avail_actions == 0] = -9999999
-        max_action_qvals, max_action_index = x_mac_out[:, :-1].max(dim=3)
-
-        max_action_index = max_action_index.detach().unsqueeze(3)
-        is_max_action = (max_action_index == actions).int().float()
 
         # Calculate the Q-Values necessary for the target
         self.target_mac.init_hidden(batch.batch_size)
@@ -116,15 +104,13 @@ class DiffQ_Learner:
         target_mac_out, target_hidden_store, _ = self.target_mac.agent.forward(
             input_here.clone().detach(), initial_hidden_target.clone().detach())
 
-        with th.no_grad():
-            # alone agent obs
-            hidden_store_q = target_hidden_store.clone().reshape(-1, self.args.rnn_hidden_dim).repeat(1, self.n_agents)
-            hidden_store_q = hidden_store_q.view(-1, self.n_agents*self.args.rnn_hidden_dim)
-            target_tau = self.target_diff_network(hidden_store_q)
-            target_tau = target_tau.reshape(-1, target_mac_out.shape[1], target_mac_out.shape[2], target_mac_out.shape[-1])
-        target_mac_out = (1 - beta)*target_tau + beta*target_mac_out
-
         target_mac_out = target_mac_out[:, 1:]
+
+        target_hidden_store = target_hidden_store.reshape(
+            -1, input_here.shape[1], target_hidden_store.shape[-2], target_hidden_store.shape[-1]).permute(0, 2, 1, 3)
+        with th.no_grad():
+            target_latent, _, _ = self.target_diff_network.encode(target_hidden_store[:, 1:])
+
         # Mask out unavailable actions
         target_mac_out[avail_actions[:, 1:] == 0] = -9999999
 
@@ -140,16 +126,13 @@ class DiffQ_Learner:
 
         # Mix
         if self.mixer is not None:
-            chosen_action_qvals = self.mixer(chosen_action_qvals, batch["state"][:, :-1])
-            target_max_qvals = self.target_mixer(target_max_qvals, batch["state"][:, 1:])
+            chosen_action_qvals = self.mixer(chosen_action_qvals, batch["state"][:, :-1], latent)
+            target_max_qvals = self.target_mixer(target_max_qvals, batch["state"][:, 1:], target_latent)
 
         N = getattr(self.args, "n_step", 1)
         if N == 1:
             # Calculate 1-step Q-Learning targets
             targets = rewards + self.args.gamma * (1 - terminated) * target_max_qvals
-            # targets = rewards + self.args.beta * \
-            #     intrinsic_rewards.mean(dim=1) + self.args.gamma * \
-            #     (1 - terminated) * target_max_qvals
         else:
             # N step Q-Learning targets
             n_rewards = th.zeros_like(rewards)
@@ -171,11 +154,11 @@ class DiffQ_Learner:
 
         # Normal L2 loss, take mean over actual data
         loss = (masked_td_error ** 2).sum() / mask.sum()
-
-        norm_loss = F.l1_loss(local_qs, target=th.zeros_like(
-            local_qs), size_average=True)
-        loss += norm_loss / 10
-        loss += loss_d*0.001
+        #
+        # norm_loss = F.l1_loss(local_qs, target=th.zeros_like(
+        #     local_qs), size_average=True)
+        # loss += norm_loss / 10
+        loss += vae_loss * 0.02
 
         # Optimise
         self.optimiser.zero_grad()
@@ -192,6 +175,9 @@ class DiffQ_Learner:
 
         if t_env - self.log_stats_t >= self.args.learner_log_interval:
             self.logger.log_stat("loss", loss.item(), t_env)
+            self.logger.log_stat("vae_loss", vae_loss.item(), t_env)
+            self.logger.log_stat("recon_loss", recon_loss.item(), t_env)
+            self.logger.log_stat("entropy_loss", entropy_loss.item(), t_env)
             self.logger.log_stat("grad_norm", grad_norm, t_env)
             self.logger.log_stat("grad_norm_diff", grad_norm_diff, t_env)
             mask_elems = mask.sum().item()

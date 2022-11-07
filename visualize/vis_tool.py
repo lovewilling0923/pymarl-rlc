@@ -30,10 +30,13 @@ def get_num(map):
         load_num = 100
     if smac_map == '2s3z':
         load_num = 150
+<<<<<<< HEAD
     if smac_map == '6h_vs_8z' or smac_map == '3s5z_vs_3s6z' or smac_map == 'corridor':
         load_num = 500
+=======
+>>>>>>> parent of 01150f7 (.)
     return load_num
-nums = 5
+nums = 8
 
 def smooth(y, radius, mode='two_sided', valid_only=False):
     '''
@@ -168,9 +171,8 @@ def read_file(smac_map, load_num):
             result_data = json.load(f)['test_battle_won_mean']
             result_data = np.array(result_data)[:load_num]
             term_files.append(result_data)
-            print(len(result_data))
-
         term_files = np.array(term_files).T.tolist()
+        print(term_files)
         files[alg_name]=term_files
     return files
 
@@ -211,9 +213,17 @@ def plt_term_mean(smac_map, load_num, files, i, j):
             mean = sum(val) / len(val)
             mean_values.append(mean)
             variance = np.std(val)#/(np.sqrt(len(val)))
+<<<<<<< HEAD
             #
             # if smac_map == 'MMM2' and alg_name=='mixrts':
             #     variance = variance if variance < 0.15 else 0.12
+=======
+
+            if smac_map == 'MMM2' and alg_name=='mixrts':
+                variance = variance if variance < 0.15 else 0.12
+                print(variance)
+
+>>>>>>> parent of 01150f7 (.)
 
             max_values.append(mean + variance)
             min_values.append(mean - variance)
@@ -230,11 +240,16 @@ def plt_term_mean(smac_map, load_num, files, i, j):
         plt.plot(x, y, linewidth=2.0, label=label, color=colors_map[label])
         plt.fill_between(np.arange(len(coll[alg_name])), min_values, max_values,
                          color=colors.to_rgba(colors_map[label], alpha=0.15))
+<<<<<<< HEAD
     plt.ylim(-2, 101)
     plt.xlim(-2, load_num+1)
     plt.yticks((range(0, 101, 20)))
     if load_num==200:
         plt.xticks((range(0, len(coll[alg_name]) + 3, 50)), ("0", "0.50", "1.00", "1.50", "2.00"))
+=======
+    plt.ylim(-2, 102)
+    plt.xlim(-3, load_num+3)
+>>>>>>> parent of 01150f7 (.)
 
     if load_num==500:
         plt.xticks((range(0, len(coll[alg_name])+1, 100)), ("0", "1.00", "2.00", "3.00", "4.00", "5.00"))
@@ -252,8 +267,13 @@ def plt_term_mean(smac_map, load_num, files, i, j):
 
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     smac_maps = ['8m', '2s_vs_1sc', '8m_vs_9m', '2c_vs_64zg', '5m_vs_6m', '3s_vs_5z', 'MMM2', '3s5z_vs_3s6z', '6h_vs_8z']#
     # smac_maps = ['8m', '5m_vs_6m', 'MMM2', '3s_vs_5z']#
+=======
+    smac_maps = ['3m', '8m', '2s3z', '2s_vs_1sc', '5m_vs_6m', '8m_vs_9m', '3s5z', '6h_vs_8z', 'MMM2']#, 'MMM2'
+    # smac_maps = ['5m_vs_6m',]#, 'MMM2'
+>>>>>>> parent of 01150f7 (.)
     ax = plt.figure(figsize=(16, 12), dpi=400)
     Grid = plt.GridSpec(3, 3, wspace=0.2, hspace=0.4)
     plt.rcParams.update({'font.size': 15})

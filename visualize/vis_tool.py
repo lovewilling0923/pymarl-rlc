@@ -19,7 +19,6 @@ colors_map = {
 
 _term = 'win_rates'    # win_rates or episode_rewards
 algs = ['vdn', 'qmix', 'qtran', 'qplex', 'ow_qmix', 'cw_qmix', 'cds', 'shaq']
-# algs = ['vdn', 'qmix', 'qtran', 'qplex']
 q_tree_depth = 3
 mix_q_tree_depth = 3
 beta = 0
@@ -253,8 +252,8 @@ def plt_term_mean(smac_map, load_num, files, i, j):
 
 
 if __name__ == '__main__':
-    # smac_maps = ['8m', '2s_vs_1sc', '8m_vs_9m', '2c_vs_64zg', '5m_vs_6m', '3s_vs_5z', 'MMM2', '3s5z_vs_3s6z', '6h_vs_8z']#
-    smac_maps = ['8m', '2s_vs_1sc', '8m_vs_9m', '2c_vs_64zg', '5m_vs_6m', '3s_vs_5z', 'MMM2', '6h_vs_8z']#
+    smac_maps = ['8m', '2s_vs_1sc', '8m_vs_9m', '2c_vs_64zg', '5m_vs_6m', '3s_vs_5z', 'MMM2', '3s5z_vs_3s6z', '6h_vs_8z']#
+    # smac_maps = ['8m', '2s_vs_1sc', '6h_vs_8z']#
     ax = plt.figure(figsize=(16, 12), dpi=400)
     Grid = plt.GridSpec(3, 3, wspace=0.2, hspace=0.4)
     plt.rcParams.update({'font.size': 15})
@@ -267,6 +266,6 @@ if __name__ == '__main__':
 
     plt.tight_layout()
     handles, labels = ax.get_legend_handles_labels()
-    plt.legend(handles, labels, ncol=5, bbox_to_anchor=(0.5, 2.2))
+    plt.legend(handles, labels, ncol=5, bbox_to_anchor=(0.5, 4.3))
     plt.savefig('./overview_results.pdf',bbox_inches='tight')
     # plt.show()

@@ -136,4 +136,5 @@ dmypy.json
 /results/sacred/*/*/*/metrics.json
 /results/sacred/*/*/*/run.json
 /results/sacred/3s5z_vs_3s6z/
+/results/sacred/*/diffq
 nohup.out

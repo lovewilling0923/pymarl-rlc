@@ -206,9 +206,9 @@ class DiffQ_Learner:
         if self.mixer is not None:
             th.save(self.mixer.state_dict(), "{}/mixer.th".format(path))
         th.save(self.optimiser.state_dict(), "{}/opt.th".format(path))
-        th.save(self.optimiser_mixer.state_dict(), "{}/opt.th".format(path))
+        th.save(self.optimiser_diff.state_dict(), "{}/opt_mix.th".format(path))
         th.save(self.eval_diff_network.state_dict(),
-                "{}/pid.th".format(path))
+                "{}/vae.th".format(path))
 
     def load_models(self, path):
         self.mac.load_models(path)
@@ -220,10 +220,10 @@ class DiffQ_Learner:
             self.target_mixer.load_state_dict(
                 th.load("{}/mixer.th".format(path), map_location=lambda storage, loc: storage))
         self.eval_diff_network.load_state_dict(
-            th.load("{}/pid.th".format(path), map_location=lambda storage, loc: storage))
+            th.load("{}/vae.th".format(path), map_location=lambda storage, loc: storage))
         self.target_diff_network.load_state_dict(
-            th.load("{}/pid.th".format(path), map_location=lambda storage, loc: storage))
+            th.load("{}/vae.th".format(path), map_location=lambda storage, loc: storage))
         self.optimiser.load_state_dict(
             th.load("{}/opt.th".format(path), map_location=lambda storage, loc: storage))
-        self.optimiser_mixer.load_state_dict(
-            th.load("{}/opt.th".format(path), map_location=lambda storage, loc: storage))
+        self.optimiser_diff.load_state_dict(
+            th.load("{}/opt_mix.th".format(path), map_location=lambda storage, loc: storage))

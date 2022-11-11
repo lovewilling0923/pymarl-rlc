@@ -4,7 +4,7 @@
 action_selector: "epsilon_greedy"
 epsilon_start: 1.0
 epsilon_finish: 0.05
-epsilon_anneal_time: 100000 # 500000 for 6h_vs_8z
+epsilon_anneal_time: 50000 # 500000 for 6h_vs_8z
 
 runner: "episode"
 

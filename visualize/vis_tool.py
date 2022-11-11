@@ -14,11 +14,13 @@ colors_map = {
     'OW-QMIX': '#4B0082',
     'CW-QMIX': '#9D4C26',
     'CDS': '#666666',
-    'MIXRTs (ours)': 'red',
+    'MIXRTs': '#F08080',
+    'QNAM (Ours)': 'red',
 }
 
 _term = 'win_rates'    # win_rates or episode_rewards
-algs = ['vdn', 'qmix', 'qtran', 'qplex', 'ow_qmix', 'cw_qmix', 'cds', 'shaq']
+# algs = ['vdn', 'qmix', 'qtran', 'qplex', 'ow_qmix', 'cw_qmix', 'cds', 'shaq']
+algs = ['vdn', 'qmix', 'qtran', 'qplex', 'ow_qmix', 'cw_qmix', 'cds', 'shaq', 'mixrts']
 q_tree_depth = 3
 mix_q_tree_depth = 3
 beta = 0
@@ -188,7 +190,7 @@ def plt_term_mean(smac_map, load_num, files, i, j):
         elif alg_name == 'qplex':
             label = 'QPLEX'
         elif alg_name == 'mixrts':
-            label = 'MIXRTs (ours)'
+            label = 'MIXRTs'
         elif alg_name == 'ow_qmix':
             label = 'OW-QMIX'
         elif alg_name == 'cw_qmix':
@@ -199,8 +201,8 @@ def plt_term_mean(smac_map, load_num, files, i, j):
             label = 'SHAQ'
         elif alg_name == 'cds':
             label = 'CDS'
-        elif alg_name == 'gam_qmix':
-            label = 'QNAM'
+        elif alg_name == 'diffq':
+            label = 'QNAM (Ours)'
         # logger = Logger(exp_name=alg_name, env_name=smac_map,)
 
         mean_values = []
@@ -211,9 +213,6 @@ def plt_term_mean(smac_map, load_num, files, i, j):
             mean = sum(val) / len(val)
             mean_values.append(mean)
             variance = np.std(val)#/(np.sqrt(len(val)))
-            #
-            # if smac_map == 'MMM2' and alg_name=='mixrts':
-            #     variance = variance if variance < 0.15 else 0.12
 
             max_values.append(mean + variance)
             min_values.append(mean - variance)
@@ -252,8 +251,9 @@ def plt_term_mean(smac_map, load_num, files, i, j):
 
 
 if __name__ == '__main__':
-    smac_maps = ['8m', '2s_vs_1sc', '8m_vs_9m', '2c_vs_64zg', '5m_vs_6m', '3s_vs_5z', 'MMM2', '3s5z_vs_3s6z', '6h_vs_8z']#
-    # smac_maps = ['8m', '2s_vs_1sc', '6h_vs_8z']#
+    # smac_maps = ['8m', '2s_vs_1sc', '8m_vs_9m', '2c_vs_64zg', '5m_vs_6m', '3s_vs_5z', 'MMM2', '3s5z_vs_3s6z', '6h_vs_8z']#
+    smac_maps = ['8m', '2s_vs_1sc', '6h_vs_8z', '3s5z_vs_3s6z', 'MMM2', '2c_vs_64zg', '3s_vs_5z']
+    # smac_maps = ['2s_vs_1sc', '3s_vs_5z', '5m_vs_6m', '8m_vs_9m']
     ax = plt.figure(figsize=(16, 12), dpi=400)
     Grid = plt.GridSpec(3, 3, wspace=0.2, hspace=0.4)
     plt.rcParams.update({'font.size': 15})

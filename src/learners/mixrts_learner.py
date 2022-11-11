@@ -6,7 +6,6 @@ from modules.mixers.mixrts import MixingTree
 import torch as th
 from torch.optim import RMSprop
 from utils.rl_utils import build_td_lambda_targets, build_q_lambda_targets
-from utils.rl_utils import build_td_lambda_targets, build_q_lambda_targets
 
 class MIXRTLearner:
     def __init__(self, mac, scheme, logger, args):

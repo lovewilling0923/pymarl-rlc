@@ -4,7 +4,7 @@
 action_selector: "epsilon_greedy"
 epsilon_start: 1.0
 epsilon_finish: 0.05
-epsilon_anneal_time: 50000
+epsilon_anneal_time: 50000  # 6h_vs_8z=100000
 
 runner: "episode"
 
@@ -17,7 +17,7 @@ agent: "rnn_sd" # Default rnn agent
 
 # use the Q_Learner to train
 agent_output_type: "q"
-learner: "diffq_learner"
+learner: "qnam_learner"
 double_q: True
 mixer: "qnam"
 mixing_embed_dim: 32
@@ -25,4 +25,6 @@ hypernet_layers: 2
 hypernet_embed: 64
 obs_agent_id: False # Include the agent's one_hot id in the observation
 
-name: "diffq"
+td_lambda: 0.6 # pp=0.5, 6h_vs_8z=0.3
+
+name: "qnam"

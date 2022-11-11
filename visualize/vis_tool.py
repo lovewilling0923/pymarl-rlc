@@ -19,8 +19,8 @@ colors_map = {
 }
 
 _term = 'win_rates'    # win_rates or episode_rewards
-# algs = ['vdn', 'qmix', 'qtran', 'qplex', 'ow_qmix', 'cw_qmix', 'cds', 'shaq']
-algs = ['vdn', 'qmix', 'qtran', 'qplex', 'ow_qmix', 'cw_qmix', 'cds', 'shaq', 'mixrts']
+algs = ['vdn', 'qmix', 'qtran', 'qplex', 'ow_qmix', 'cw_qmix', 'cds', 'shaq']
+# algs = ['vdn', 'qmix', 'qtran', 'qplex', 'ow_qmix', 'cw_qmix', 'cds', 'shaq', 'mixrts']
 q_tree_depth = 3
 mix_q_tree_depth = 3
 beta = 0
@@ -251,8 +251,8 @@ def plt_term_mean(smac_map, load_num, files, i, j):
 
 
 if __name__ == '__main__':
-    # smac_maps = ['8m', '2s_vs_1sc', '8m_vs_9m', '2c_vs_64zg', '5m_vs_6m', '3s_vs_5z', 'MMM2', '3s5z_vs_3s6z', '6h_vs_8z']#
-    smac_maps = ['8m', '2s_vs_1sc', '6h_vs_8z', '3s5z_vs_3s6z', 'MMM2', '2c_vs_64zg', '3s_vs_5z']
+    smac_maps = ['8m', '2s_vs_1sc', '8m_vs_9m', '2c_vs_64zg', '5m_vs_6m', '3s_vs_5z', 'MMM2', '3s5z_vs_3s6z', '6h_vs_8z']#
+    # smac_maps = ['8m', '2s_vs_1sc', '6h_vs_8z', '3s5z_vs_3s6z', 'MMM2', '2c_vs_64zg', '3s_vs_5z']
     # smac_maps = ['2s_vs_1sc', '3s_vs_5z', '5m_vs_6m', '8m_vs_9m']
     ax = plt.figure(figsize=(16, 12), dpi=400)
     Grid = plt.GridSpec(3, 3, wspace=0.2, hspace=0.4)

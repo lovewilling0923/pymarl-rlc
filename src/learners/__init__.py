@@ -12,6 +12,7 @@ from .sqddpg_learner import SQDDPGLearner
 from .qamix_learner import QamixLearner
 from .cds_learner import CDS_Learner
 from .diffq_learner import DiffQ_Learner
+from .mixrts_learner import MIXRTLearner
 
 
 REGISTRY = {}
@@ -30,3 +31,4 @@ REGISTRY["sqddpg_learner"] = SQDDPGLearner
 REGISTRY["qamix_learner"] = QamixLearner
 REGISTRY["cds_learner"] = CDS_Learner
 REGISTRY["diffq_learner"] = DiffQ_Learner
+REGISTRY["mixrts_learner"] = MIXRTLearner

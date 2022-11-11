@@ -2,10 +2,13 @@ import copy
 from components.episode_buffer import EpisodeBatch
 from modules.mixers.vdn import VDNMixer
 from modules.mixers.qmix import QMixer
+from modules.mixers.mixrts import MixingTree
 import torch as th
 from torch.optim import RMSprop
+from utils.rl_utils import build_td_lambda_targets, build_q_lambda_targets
+from utils.rl_utils import build_td_lambda_targets, build_q_lambda_targets
 
-class QLearner:
+class MIXRTLearner:
     def __init__(self, mac, scheme, logger, args):
         self.args = args
         self.mac = mac
@@ -17,10 +20,8 @@ class QLearner:
 
         self.mixer = None
         if args.mixer is not None:
-            if args.mixer == "vdn":
-                self.mixer = VDNMixer()
-            elif args.mixer == "qmix":
-                self.mixer = QMixer(args)
+            if args.mixer == "mixrts":
+                self.mixer = MixingTree(args)
             else:
                 raise ValueError("Mixer {} not recognised.".format(args.mixer))
             self.params += list(self.mixer.parameters())
@@ -61,31 +62,22 @@ class QLearner:
             target_mac_out.append(target_agent_outs)
 
         # We don't need the first timesteps Q-Value estimate for calculating targets
-        target_mac_out = th.stack(target_mac_out[1:], dim=1)  # Concat across time
+        target_mac_out = th.stack(target_mac_out, dim=1)  # Concat across time
 
-        # Mask out unavailable actions
-        target_mac_out[avail_actions[:, 1:] == 0] = -9999999  # From OG deepmarl
+        # Max over target Q-Values/ Double q learning
+        mac_out_detach = mac_out.clone().detach()
+        mac_out_detach[avail_actions == 0] = -9999999
+        cur_max_actions = mac_out_detach.max(dim=3, keepdim=True)[1]
+        target_max_qvals = th.gather(target_mac_out, 3, cur_max_actions).squeeze(3)
 
-        # Max over target Q-Values
-        if self.args.double_q:
-            # Get actions that maximise live Q (for double q-learning)
-            mac_out_detach = mac_out.clone().detach()
-            mac_out_detach[avail_actions == 0] = -9999999
-            cur_max_actions = mac_out_detach[:, 1:].max(dim=3, keepdim=True)[1]
-            target_max_qvals = th.gather(target_mac_out, 3, cur_max_actions).squeeze(3)
-
-        else:
-            target_max_qvals = target_mac_out.max(dim=3)[0]
-
-        # Mix
-        if self.mixer is not None:
-            chosen_action_qvals = self.mixer(chosen_action_qvals, batch["state"][:, :-1])
-            target_max_qvals = self.target_mixer(target_max_qvals, batch["state"][:, 1:])
+        chosen_action_qvals = self.mixer(chosen_action_qvals, batch["state"][:, :-1])
+        target_max_qvals = self.target_mixer(target_max_qvals, batch["state"][:, :])
 
         N = getattr(self.args, "n_step", 1)
         if N == 1:
             # Calculate 1-step Q-Learning targets
-            targets = rewards + self.args.gamma * (1 - terminated) * target_max_qvals
+            targets = build_td_lambda_targets(rewards, terminated, mask, target_max_qvals,
+                                              self.args.n_agents, self.args.gamma, self.args.td_lambda)
         else:
             # N step Q-Learning targets
             n_rewards = th.zeros_like(rewards)

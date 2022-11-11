@@ -15,7 +15,7 @@ target_update_interval: 200
 
 # use the Q_Learner to train
 agent_output_type: "q"
-learner: "q_learner"
+learner: "mixrts_learner"
 double_q: True
 
 agent: "rtcs" # Default rnn agent

@@ -5,8 +5,7 @@ import torch as th
 import torch.nn.functional as F
 from components.episode_buffer import EpisodeBatch
 from modules.mixers.qnam import QNAMer
-from modules.intrinsic.diffusion_network import Diffusion, VAE
-from torch.utils.data.sampler import BatchSampler, SubsetRandomSampler
+from modules.intrinsic.qnam_context import VAE
 from torch.optim import RMSprop, Adam
 from utils.rl_utils import build_td_lambda_targets, build_q_lambda_targets
 
@@ -146,7 +145,7 @@ class QNAM_Learner:
         # Normal L2 loss, take mean over actual data
         loss = (masked_td_error ** 2).sum() / mask.sum()
 
-        loss += vae_loss
+        loss += vae_loss*self.args.beta_vae
 
         # Optimise
         self.optimiser.zero_grad()

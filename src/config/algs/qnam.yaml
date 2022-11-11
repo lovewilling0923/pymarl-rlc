@@ -14,6 +14,7 @@ buffer_size: 5000
 target_update_interval: 200
 
 agent: "rnn_sd" # Default rnn agent
+rnn_hidden_dim: 64 # Default rnn_hidden_dim=vae_latent_dim
 
 # use the Q_Learner to train
 agent_output_type: "q"
@@ -25,6 +26,8 @@ hypernet_layers: 2
 hypernet_embed: 64
 obs_agent_id: False # Include the agent's one_hot id in the observation
 
+mix_nary: [1, ]  # mix nam n-ary
 td_lambda: 0.6 # pp=0.5, 6h_vs_8z=0.3
+beta_vae: 0.1 # vae latent loss beta
 
 name: "qnam"

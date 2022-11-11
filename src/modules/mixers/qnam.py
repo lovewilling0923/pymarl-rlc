@@ -161,6 +161,10 @@ class QNAMer(nn.Module):
             hidden_dims = list(hidden_dims)
         self.hidden_dims = hidden_dims
         self.unit_dim = args.unit_dim
+        try:
+            nary = args.mix_nary
+        except:
+            print("using defult mix nary:", nary)
 
         if nary is None:
             # if no nary specified, unary model is initialized for each obs
@@ -262,15 +266,6 @@ class QNAMer(nn.Module):
         # non_max_filter = 1 - max_filter
 
         # q_tot = ((w1 * non_max_filter + max_filter) * agent_qs).sum(dim=2, keepdim=True) + V
-
-        ######################
-        # W_final = torch.bmm(out_nn, w1) + b1
-        # W_final = F.softmax(W_final.view(-1, 1, self.n_agents), dim=-1)
-        # V = self.hyper_b_final(states).view(-1, 1, 1)
-        # agent_qs = agent_qs.view(-1, self.n_agents, 1)
-        # y = torch.bmm(W_final, agent_qs) + V
-        # # Reshape and return
-        # q_tot = y.view(bs, -1, 1)
 
         return q_tot
 

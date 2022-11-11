@@ -29,4 +29,6 @@ kernel: "dot" # dot/add
 softmax_w: True
 beta: 0
 
+td_lambda: 0.6
+
 name: "mixrts"

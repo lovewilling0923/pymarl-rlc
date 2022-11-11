@@ -5,7 +5,7 @@ from modules.mixers.qmix import QMixer
 from modules.mixers.mixrts import MixingTree
 import torch as th
 from torch.optim import RMSprop
-
+from utils.rl_utils import build_td_lambda_targets, build_q_lambda_targets
 
 class QLearner:
     def __init__(self, mac, scheme, logger, args):
@@ -77,6 +77,7 @@ class QLearner:
             mac_out_detach[avail_actions == 0] = -9999999
             cur_max_actions = mac_out_detach[:, 1:].max(dim=3, keepdim=True)[1]
             target_max_qvals = th.gather(target_mac_out, 3, cur_max_actions).squeeze(3)
+
         else:
             target_max_qvals = target_mac_out.max(dim=3)[0]
 
@@ -88,14 +89,18 @@ class QLearner:
         N = getattr(self.args, "n_step", 1)
         if N == 1:
             # Calculate 1-step Q-Learning targets
-            targets = rewards + self.args.gamma * (1 - terminated) * target_max_qvals
+            if self.args.mixer == "mixrts":
+                targets = build_td_lambda_targets(rewards, terminated, mask, target_max_qvals,
+                                                    self.args.n_agents, self.args.gamma, self.args.td_lambda)
+            else:
+                targets = rewards + self.args.gamma * (1 - terminated) * target_max_qvals
         else:
             # N step Q-Learning targets
             n_rewards = th.zeros_like(rewards)
             gamma_tensor = th.tensor([self.args.gamma**i for i in range(N)], dtype=th.float, device=n_rewards.device)
             steps = mask.flip(1).cumsum(dim=1).flip(1).clamp_max(N).long()
             for i in range(batch.max_seq_length - 1):
-                n_rewards[:,i,0] = ((rewards * mask)[:,i:i+N,0] * gamma_tensor[:(batch.max_seq_length - 1 - i)]).sum(dim=1)
+                n_rewards[:, i, 0] = ((rewards * mask)[:,i:i+N,0] * gamma_tensor[:(batch.max_seq_length - 1 - i)]).sum(dim=1)
             indices = th.linspace(0, batch.max_seq_length-2, steps=batch.max_seq_length-1, device=steps.device).unsqueeze(1).long()
             n_targets_terminated = th.gather(target_max_qvals*(1-terminated),dim=1,index=steps.long()+indices-1)
             targets = n_rewards + th.pow(self.args.gamma, steps.float()) * n_targets_terminated

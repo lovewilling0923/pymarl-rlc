@@ -8,6 +8,8 @@ from modules.mixers.qnam import QNAMer
 from modules.intrinsic.qnam_context import VAE
 from torch.optim import RMSprop, Adam
 from utils.rl_utils import build_td_lambda_targets, build_q_lambda_targets
+import matplotlib.pyplot as plt
+import time
 
 
 class QNAM_Learner:
@@ -53,6 +55,12 @@ class QNAM_Learner:
 
         self.log_stats_t = -self.args.learner_log_interval - 1
 
+
+        # Enable interactive mode.
+        plt.ion()
+        # Create a figure and a set of subplots.
+        self.figure, self.ax = plt.subplots()
+
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         # Get the relevant quantities
         rewards = batch["reward"][:, :-1]
@@ -86,6 +94,9 @@ class QNAM_Learner:
         # entropy_loss = - (recon * th.log2(recon)).sum(-1).mean()/self.n_agents
         entropy_loss = F.l1_loss(recon, target=th.zeros_like(recon), size_average=True)
         vae_loss = recon_loss + KL_loss + entropy_loss
+
+        all_state = batch["state"][:, :-1]
+        self.vis_tool(all_state, recon, 1)
 
         with th.no_grad():
             latent, _, _ = self.eval_diff_network.encode(hidden_store[:, :-1])
@@ -222,3 +233,27 @@ class QNAM_Learner:
             th.load("{}/opt.th".format(path), map_location=lambda storage, loc: storage))
         self.optimiser_diff.load_state_dict(
             th.load("{}/opt_mix.th".format(path), map_location=lambda storage, loc: storage))
+
+    def vis_tool(self, obs, recon, agent=0):
+        # fig fist plt
+        obs = obs[0,:,:].reshape(-1, 10, 10, 3)
+        recon = recon[0,:,agent,:]
+        ep_len = len(obs)
+
+        imshape = (10, 10, 3)
+        imdata = np.zeros(imshape)
+        # return AxesImage object for using.
+        im = self.ax.imshow(imdata)
+        for n in range(ep_len):
+            # A template of data generate...
+            imdata = obs[n]
+            # update image data
+            im.set_data(imdata)
+            # draw and flush the figure .
+            self.figure.canvas.draw()
+            self.figure.canvas.flush_events()
+            time.sleep(0.01)
+        imdata = np.zeros(imshape)
+        im.set_data(imdata)
+        time.sleep(0.01)
+

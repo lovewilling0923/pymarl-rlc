@@ -28,7 +28,7 @@ mix_q_tree_depth: 3
 kernel: "dot" # dot/add
 softmax_w: True
 beta: 0
-
+burn_in_period: 100
 td_lambda: 0.8
 
 name: "mixrts"

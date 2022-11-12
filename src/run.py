@@ -146,7 +146,6 @@ def run_sequential(args, logger):
     print("args.n_agents: ", args.n_agents)
     print("args.unit_dim: ", args.unit_dim)
 
-
     # Default/Base scheme
     scheme = {
         "state": {"vshape": env_info["state_shape"]},
@@ -164,6 +163,7 @@ def run_sequential(args, logger):
     }
 
     buffer = ReplayBuffer(scheme, groups, args.buffer_size, env_info["episode_limit"] + 1,
+                          burn_in_period=args.burn_in_period,
                           preprocess=preprocess,
                           device="cpu" if args.buffer_cpu_only else args.device)
 

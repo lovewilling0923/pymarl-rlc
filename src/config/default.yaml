@@ -16,7 +16,7 @@ t_max: 10000 # Stop running after this many timesteps
 use_cuda: True # Use gpu by default unless it isn't available
 gpu_id: "0"
 buffer_cpu_only: True # If true we won't keep all of the replay buffer in vram
-
+burn_in_period: 32
 # --- Logging options ---
 
 use_tensorboard: False # Log results to tensorboard

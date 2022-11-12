@@ -237,7 +237,7 @@ class QNAM_Learner:
     def vis_tool(self, obs, recon, agent=0):
         # fig fist plt
         obs = obs[0,:,:].reshape(-1, 10, 10, 3)
-        recon = recon[0,:,agent,:]
+        recon = recon[0, :, agent, :].reshape(-1, 5, 5, 3)
         ep_len = len(obs)
 
         imshape = (10, 10, 3)
@@ -249,6 +249,11 @@ class QNAM_Learner:
             imdata = obs[n]
             # update image data
             im.set_data(imdata)
+
+            cur_recon = recon[n]
+            imdata_recon = np.pad(cur_recon, ((5, 0), (5, 0)), 'constant', constant_values=0)
+            im.set_data(imdata_recon, alpha=0.3)
+
             # draw and flush the figure .
             self.figure.canvas.draw()
             self.figure.canvas.flush_events()

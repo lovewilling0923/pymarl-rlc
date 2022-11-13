@@ -17,4 +17,4 @@ python src/main.py --config=mixrts --env-config=sc2 with env_args.map_name=MMM2 
 # demo stag_hunt
 python3 src/main.py --config=mixrts --env-config=stag_hunt with env_args.map_name=pp-2 env_args.miscapture_punishment=-2 gpu_id=0
 # demo foraging
-python3 src/main.py --config=qnam --env-config=foraging with env_args.map_name=lbf-4 seed=0 gpu_id=0
+python3 src/main.py --config=qmix --env-config=foraging with env_args.map_name=lbf-4 seed=1 use_cuda=False

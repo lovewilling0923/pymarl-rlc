@@ -56,14 +56,15 @@ class ForagingEnv(MultiAgentEnv):
         env_id = "Foraging{4}-{0}x{0}-{1}p-{2}f{3}-v0".format(field_size, players, max_food,
                                                               "-coop" if force_coop else "",
                                                               "-{}s".format(sight) if partially_observe else "")
-        if is_print:
-            print('Env:', env_id, file=stderr)
+        print('Env:', env_id, file=stderr)
+        print('Env:', env_id, file=stderr)
+        print('Env:', env_id, file=stderr)
         self.env = gym.make(env_id)
         self.env.seed(seed)
 
         if self.need_render:
             date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            render_path = os.path.join(render_output_path, date)
+            render_path = os.path.join(render_output_path, 'lbf_vis', date)
             if not os.path.exists(render_path):
                 os.makedirs(render_path, exist_ok=True)
             self.render_path = render_path
@@ -80,17 +81,17 @@ class ForagingEnv(MultiAgentEnv):
             print(self.env.unwrapped.get_players_position(), file=stderr)
             print('choose actions: ', file=stderr)
             print(actions.cpu().numpy().tolist(), file=stderr)
-            position_record = self.env.unwrapped.get_players_position()
-            action_record = actions.cpu().numpy().tolist()
-            env_info = {
-                'position': position_record,
-                'action': action_record
-            }
-            import pickle
-            pickle.dump(env_info, open(os.path.join(self.render_path, f'info_step_{self._episode_steps}.pkl'), 'wb'))
+        position_record = self.env.unwrapped.get_players_position()
+        action_record = actions.cpu().numpy().tolist()
+        env_info = {
+            'agent_position': position_record,
+            'agent_action': action_record
+        }
+            # import pickle
+            # pickle.dump(env_info, open(os.path.join(self.render_path, f'info_step_{self._episode_steps}.pkl'), 'wb'))
 
         if self.need_render:
-            fig = plt.figure()
+            fig = plt.figure(dpi=400)
             data = self.env.render(mode='rgb_array')
             plt.imshow(data)
             plt.axis('off')
@@ -98,13 +99,14 @@ class ForagingEnv(MultiAgentEnv):
                         dpi=600)
 
         self.obs, rewards, dones, info = self.env.step(actions.cpu().numpy())
-
         self.agent_score += rewards
 
         reward = np.sum(rewards)
+        # step penalty
+        reward -= 0.002
         terminated = np.all(dones)
 
-        return reward, terminated, {}
+        return reward, terminated, env_info
 
     def get_obs(self):
         """ Returns all agent observations in a list """

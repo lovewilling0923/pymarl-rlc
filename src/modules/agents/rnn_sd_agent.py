@@ -19,7 +19,11 @@ class RNN_SD_Agent(nn.Module):
         )
         self.fc2 = nn.Linear(args.rnn_hidden_dim, args.n_actions)
 
-        self.mlp = nn.ModuleList([nn.Linear(args.rnn_hidden_dim, args.n_actions) for _ in range(self.n_agents)])
+        self.mlp = nn.ModuleList([nn.Sequential(
+            nn.Linear(args.rnn_hidden_dim, args.rnn_hidden_dim * 4),
+            nn.ReLU(),
+            nn.Linear(args.rnn_hidden_dim * 4, args.n_actions),
+        ) for _ in range(self.n_agents)])
 
     def init_hidden(self):
         # make hidden states on same device as model

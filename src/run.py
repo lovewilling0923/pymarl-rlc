@@ -44,6 +44,7 @@ map_dict = {
     "pp-2":{"ally_num":8,"enemy_num":8},
     "pp-1":{"ally_num":8,"enemy_num":8},
     "pp-0.5":{"ally_num":8,"enemy_num":8},
+    "lbf-4":{"ally_num":4,"enemy_num":4},
 }
 
 
@@ -138,8 +139,10 @@ def run_sequential(args, logger):
     args.obs_shape = env_info["obs_shape"]
     if 'sc2' in args.env:
         args.unit_dim = runner.env.shield_bits_ally + runner.env.unit_type_bits + 4
-    elif '' in args.env:
+    elif 'stag_hunt' in args.env:
         args.unit_dim = runner.env.x_max * runner.env.y_max
+    elif 'foraging' in args.env:
+        args.unit_dim = runner.env.field_size * runner.env.field_size
     print("args.state_shape: ", args.state_shape)
     print("args.obs_shape: ", args.obs_shape)
     print("args.n_actions: ", args.n_actions)

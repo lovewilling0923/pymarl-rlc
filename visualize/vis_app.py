@@ -250,12 +250,11 @@ def plt_term_mean(smac_map, load_num, files, i, j):
 
 
 if __name__ == '__main__':
-    # smac_maps = ['8m','2s_vs_1sc', '8m_vs_9m', '2c_vs_64zg', '5m_vs_6m', '3s_vs_5z', 'MMM2', '6h_vs_8z', '3s5z_vs_3s6z']
-    smac_maps = ['8m','2s3z','3s5z','2s_vs_1sc', '8m_vs_9m', '2c_vs_64zg', '5m_vs_6m', '3s_vs_5z', 'MMM2', '6h_vs_8z', '3s5z_vs_3s6z']
+    #     smac_maps = ['8m','2s3z','3s5z','2s_vs_1sc', '8m_vs_9m', '2c_vs_64zg', '5m_vs_6m', '3s_vs_5z', 'MMM2', '6h_vs_8z', '3s5z_vs_3s6z']
+    smac_maps = ['8m','2s3z','3s5z','2s_vs_1sc', '2c_vs_64zg']
     # smac_maps = ['5m_vs_6m']
-    ax = plt.figure(figsize=(16, 12), dpi=400)
-    Grid = plt.GridSpec(4, 3, wspace=0.2, hspace=0.4)
-    # Grid = plt.GridSpec(3, 3, wspace=0.2, hspace=0.6)
+    ax = plt.figure(figsize=(16, 8), dpi=400)
+    Grid = plt.GridSpec(2, 3, wspace=0.2, hspace=0.4)
     plt.rcParams.update({'font.size': 15})
 
     for i, smac_map in enumerate(smac_maps):
@@ -266,6 +265,6 @@ if __name__ == '__main__':
 
     plt.tight_layout()
     handles, labels = ax.get_legend_handles_labels()
-    plt.legend(handles, labels, ncol=5, bbox_to_anchor=(0.5, 4.3))
-    plt.savefig('./overview_results.pdf',bbox_inches='tight')
+    plt.legend(handles, labels, ncol=5, bbox_to_anchor=(0.5, 2.9))
+    plt.savefig('./overview_results_app.pdf',bbox_inches='tight')
     # plt.show()

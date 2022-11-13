@@ -53,7 +53,7 @@ env_args:
 
 test_greedy: True
 t_max: 1010000
-test_nepisode: 32 # Number of episodes to test for
+test_nepisode: 16 # Number of episodes to test for
 test_interval: 10000
 log_interval: 10000
 runner_log_interval: 10000

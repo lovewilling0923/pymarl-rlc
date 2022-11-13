@@ -83,7 +83,7 @@
   "save_model": false,
   "save_model_interval": 2000000,
   "save_replay": false,
-  "seed": 5,
+  "seed": 4,
   "t_max": 2005000,
   "target_update_interval": 200,
   "test_greedy": true,

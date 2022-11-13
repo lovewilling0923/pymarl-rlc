@@ -136,6 +136,7 @@ dmypy.json
 /results/sacred/*/*/*/metrics.json
 /results/sacred/*/*/*/run.json
 /results/sacred/*/qnam/
+/results/sacred/*/qamix/
 /results/sacred/*/mixrts/
 /results/sacred/pp*/
 nohup.out

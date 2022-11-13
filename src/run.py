@@ -142,7 +142,7 @@ def run_sequential(args, logger):
     elif 'stag_hunt' in args.env:
         args.unit_dim = runner.env.x_max * runner.env.y_max
     elif 'foraging' in args.env:
-        args.unit_dim = runner.env.field_size * runner.env.field_size
+        args.unit_dim = 0
     print("args.state_shape: ", args.state_shape)
     print("args.obs_shape: ", args.obs_shape)
     print("args.n_actions: ", args.n_actions)

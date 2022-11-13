@@ -139,4 +139,5 @@ dmypy.json
 /results/sacred/*/qamix/
 /results/sacred/*/mixrts/
 /results/sacred/pp*/
+/results/sacred/lbf*/
 nohup.out

@@ -48,7 +48,7 @@ class QNAM_Learner:
 
         self.optimiser = RMSprop(
             params=self.params, lr=args.lr, alpha=args.optim_alpha, eps=args.optim_eps)
-        self.optimiser_diff = Adam(params=self.params_mixer, lr=args.lr, eps=args.optim_eps)
+        self.optimiser_diff = RMSprop(params=self.params, lr=args.lr, alpha=args.optim_alpha, eps=args.optim_eps)
 
         # a little wasteful to deepcopy (e.g. duplicates action selector), but should work for any MAC
         self.target_mac = copy.deepcopy(mac)
@@ -110,57 +110,56 @@ class QNAM_Learner:
             -1, initial_hidden_target.shape[-1]).to(self.args.device)
         target_mac_out, target_hidden_store, _ = self.target_mac.agent.forward(
             input_here.clone().detach(), initial_hidden_target.clone().detach())
+        #
+        # td_lambda = getattr(self.args, "td_lambda", -1)
+        # if td_lambda>0:
+        #     # target_mac_out = target_mac_out[:, 1:]
+        #
+        #     target_hidden_store = target_hidden_store.reshape(
+        #         -1, input_here.shape[1], target_hidden_store.shape[-2], target_hidden_store.shape[-1]).permute(0, 2, 1,
+        #                                                                                                        3)
+        #     with th.no_grad():
+        #         target_latent, _, _ = self.target_diff_network.encode(target_hidden_store)
+        #
+        #     # Max over target Q-Values/ Double q learning
+        #     mac_out_detach = mac_out.clone().detach()
+        #     mac_out_detach[avail_actions == 0] = -9999999
+        #     cur_max_actions = mac_out_detach.max(dim=3, keepdim=True)[1]
+        #     target_max_qvals = th.gather(target_mac_out, 3, cur_max_actions).squeeze(3)
+        #
+        #     # Calculate n-step Q-Learning targets
+        #     chosen_action_qvals = self.mixer(chosen_action_qvals, batch["state"][:, :-1], latent)
+        #     target_max_qvals = self.target_mixer(target_max_qvals, batch["state"], target_latent)
+        #
+        #     targets = build_td_lambda_targets(rewards, terminated, mask, target_max_qvals,
+        #                                       self.args.n_agents, self.args.gamma, self.args.td_lambda)
 
-        td_lambda = getattr(self.args, "td_lambda", -1)
-        if td_lambda>0:
-            # target_mac_out = target_mac_out[:, 1:]
+        target_mac_out = target_mac_out[:, 1:]
 
-            target_hidden_store = target_hidden_store.reshape(
-                -1, input_here.shape[1], target_hidden_store.shape[-2], target_hidden_store.shape[-1]).permute(0, 2, 1,
-                                                                                                               3)
-            with th.no_grad():
-                target_latent, _, _ = self.target_diff_network.encode(target_hidden_store)
+        target_hidden_store = target_hidden_store.reshape(
+            -1, input_here.shape[1], target_hidden_store.shape[-2], target_hidden_store.shape[-1]).permute(0, 2, 1,
+                                                                                                           3)
+        with th.no_grad():
+            target_latent, _, _ = self.target_diff_network.encode(target_hidden_store[:, 1:])
 
-            # Max over target Q-Values/ Double q learning
+        # Mask out unavailable actions
+        target_mac_out[avail_actions[:, 1:] == 0] = -9999999
+
+        # Max over target Q-Values
+        if self.args.double_q:
+            # Get actions that maximise live Q (for double q-learning)
             mac_out_detach = mac_out.clone().detach()
             mac_out_detach[avail_actions == 0] = -9999999
-            cur_max_actions = mac_out_detach.max(dim=3, keepdim=True)[1]
+            cur_max_actions = mac_out_detach[:, 1:].max(dim=3, keepdim=True)[1]
             target_max_qvals = th.gather(target_mac_out, 3, cur_max_actions).squeeze(3)
-
-            # Calculate n-step Q-Learning targets
-            chosen_action_qvals = self.mixer(chosen_action_qvals, batch["state"][:, :-1], latent)
-            target_max_qvals = self.target_mixer(target_max_qvals, batch["state"], target_latent)
-
-            targets = build_td_lambda_targets(rewards, terminated, mask, target_max_qvals,
-                                              self.args.n_agents, self.args.gamma, self.args.td_lambda)
-
         else:
-            target_mac_out = target_mac_out[:, 1:]
+            target_max_qvals = target_mac_out.max(dim=3)[0]
 
-            target_hidden_store = target_hidden_store.reshape(
-                -1, input_here.shape[1], target_hidden_store.shape[-2], target_hidden_store.shape[-1]).permute(0, 2, 1,
-                                                                                                               3)
-            with th.no_grad():
-                target_latent, _, _ = self.target_diff_network.encode(target_hidden_store[:, 1:])
-
-            # Mask out unavailable actions
-            target_mac_out[avail_actions[:, 1:] == 0] = -9999999
-
-            # Max over target Q-Values
-            if self.args.double_q:
-                # Get actions that maximise live Q (for double q-learning)
-                mac_out_detach = mac_out.clone().detach()
-                mac_out_detach[avail_actions == 0] = -9999999
-                cur_max_actions = mac_out_detach[:, 1:].max(dim=3, keepdim=True)[1]
-                target_max_qvals = th.gather(target_mac_out, 3, cur_max_actions).squeeze(3)
-            else:
-                target_max_qvals = target_mac_out.max(dim=3)[0]
-
-            # Mix
-            chosen_action_qvals = self.mixer(chosen_action_qvals, batch["state"][:, :-1], latent)
-            target_max_qvals = self.target_mixer(target_max_qvals, batch["state"][:, 1:], target_latent)
-            # Calculate 1-step Q-Learning targets
-            targets = rewards + self.args.gamma * (1 - terminated) * target_max_qvals
+        # Mix
+        chosen_action_qvals = self.mixer(chosen_action_qvals, batch["state"][:, :-1], latent)
+        target_max_qvals = self.target_mixer(target_max_qvals, batch["state"][:, 1:], target_latent)
+        # Calculate 1-step Q-Learning targets
+        targets = rewards + self.args.gamma * (1 - terminated) * target_max_qvals
 
         # Td-error
         td_error = (chosen_action_qvals - targets.detach())

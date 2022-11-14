@@ -44,8 +44,9 @@ map_dict = {
     "pp-2":{"ally_num":8,"enemy_num":8},
     "pp-1":{"ally_num":8,"enemy_num":8},
     "pp-0.5":{"ally_num":8,"enemy_num":8},
-    "lbf-4":{"ally_num":4,"enemy_num":4},
+    "lbf-4-2":{"ally_num":4,"enemy_num":4},
     "lbf-4-4":{"ally_num":4,"enemy_num":4},
+    "lbf-3-3":{"ally_num":3,"enemy_num":3},
 }
 
 

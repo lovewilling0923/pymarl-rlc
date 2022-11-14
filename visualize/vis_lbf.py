@@ -19,7 +19,7 @@ colors_map = {
 }
 
 _term = 'win_rates'    # win_rates or episode_rewards
-algs = ['vdn', 'qmix', 'qtran', 'qplex', 'ow_qmix', 'cw_qmix', 'cds', 'qnam']#, 'qnam', 'qtran', 'shaq'
+algs = ['vdn', 'qmix']#, 'qnam', 'qtran', 'shaq', 'qtran', 'qplex', 'ow_qmix', 'cw_qmix', 'cds', 'qnam'
 q_tree_depth = 3
 mix_q_tree_depth = 3
 beta = 0
@@ -234,12 +234,13 @@ def plt_term_mean(smac_map, load_num, files, i, j):
     plt.xlabel('T (mil)')
     plt.ylabel('Test Return Mean', labelpad=-6.5)
     plt.rcParams.update({'font.size': 15})
+    plt.title(smac_map)
     # plt.legend(framealpha=0.3)#,  loc='lower right'
     return ax
 
 
 if __name__ == '__main__':
-    smac_maps = ['lbf-4']
+    smac_maps = ['lbf-4-2', 'lbf-4-4']
     ax = plt.figure(figsize=(16, 3), dpi=400)
     Grid = plt.GridSpec(1, 3, wspace=0.2, hspace=0.4)
     plt.rcParams.update({'font.size': 15})

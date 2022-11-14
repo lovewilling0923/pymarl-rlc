@@ -19,15 +19,15 @@ colors_map = {
 }
 
 _term = 'win_rates'    # win_rates or episode_rewards
-algs = ['vdn', 'qmix', 'qtran', 'qnam']#, 'qnam'
+algs = ['vdn', 'qmix', 'qnam', 'qtran', 'ow_qmix']#, 'qnam', 'qtran', 'cds'
 q_tree_depth = 3
 mix_q_tree_depth = 3
 beta = 0
 
 def get_num(map):
-    load_num = 100
+    load_num = 200
     return load_num
-nums = 1
+nums = 5
 
 
 def smooth(y, radius, mode='two_sided', valid_only=False):

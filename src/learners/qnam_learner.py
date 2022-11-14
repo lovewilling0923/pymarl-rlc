@@ -7,7 +7,6 @@ from components.episode_buffer import EpisodeBatch
 from modules.mixers.qnam import QNAMer
 from modules.intrinsic.qnam_context import VAE
 from torch.optim import RMSprop, Adam
-from utils.rl_utils import build_td_lambda_targets
 import matplotlib.pyplot as plt
 import time
 
@@ -31,13 +30,12 @@ class QNAM_Learner:
                 self.mixer = QNAMer(args)
             else:
                 raise ValueError("Mixer {} not recognised.".format(args.mixer))
-            # self.params += list(self.mixer.parameters())
+            self.params += list(self.mixer.parameters())
             self.target_mixer = copy.deepcopy(self.mixer)
 
         self.eval_diff_network = VAE(args.rnn_hidden_dim, args.obs_shape)
+        self.params += list(self.eval_diff_network.parameters())
         self.target_diff_network = VAE(args.rnn_hidden_dim, args.obs_shape)
-        self.params_mixer = list(self.mixer.parameters())
-        self.params_mixer += list(self.eval_diff_network.parameters())
 
         if self.args.use_cuda:
             self.eval_diff_network.cuda()
@@ -48,7 +46,6 @@ class QNAM_Learner:
 
         self.optimiser = RMSprop(
             params=self.params, lr=args.lr, alpha=args.optim_alpha, eps=args.optim_eps)
-        self.optimiser_diff = RMSprop(params=self.params, lr=args.lr, alpha=args.optim_alpha, eps=args.optim_eps)
 
         # a little wasteful to deepcopy (e.g. duplicates action selector), but should work for any MAC
         self.target_mac = copy.deepcopy(mac)
@@ -110,29 +107,6 @@ class QNAM_Learner:
             -1, initial_hidden_target.shape[-1]).to(self.args.device)
         target_mac_out, target_hidden_store, _ = self.target_mac.agent.forward(
             input_here.clone().detach(), initial_hidden_target.clone().detach())
-        #
-        # td_lambda = getattr(self.args, "td_lambda", -1)
-        # if td_lambda>0:
-        #     # target_mac_out = target_mac_out[:, 1:]
-        #
-        #     target_hidden_store = target_hidden_store.reshape(
-        #         -1, input_here.shape[1], target_hidden_store.shape[-2], target_hidden_store.shape[-1]).permute(0, 2, 1,
-        #                                                                                                        3)
-        #     with th.no_grad():
-        #         target_latent, _, _ = self.target_diff_network.encode(target_hidden_store)
-        #
-        #     # Max over target Q-Values/ Double q learning
-        #     mac_out_detach = mac_out.clone().detach()
-        #     mac_out_detach[avail_actions == 0] = -9999999
-        #     cur_max_actions = mac_out_detach.max(dim=3, keepdim=True)[1]
-        #     target_max_qvals = th.gather(target_mac_out, 3, cur_max_actions).squeeze(3)
-        #
-        #     # Calculate n-step Q-Learning targets
-        #     chosen_action_qvals = self.mixer(chosen_action_qvals, batch["state"][:, :-1], latent)
-        #     target_max_qvals = self.target_mixer(target_max_qvals, batch["state"], target_latent)
-        #
-        #     targets = build_td_lambda_targets(rewards, terminated, mask, target_max_qvals,
-        #                                       self.args.n_agents, self.args.gamma, self.args.td_lambda)
 
         target_mac_out = target_mac_out[:, 1:]
 
@@ -176,12 +150,9 @@ class QNAM_Learner:
 
         # Optimise
         self.optimiser.zero_grad()
-        self.optimiser_diff.zero_grad()
         loss.backward()
         grad_norm = th.nn.utils.clip_grad_norm_(self.params, self.args.grad_norm_clip)
-        grad_norm_diff = th.nn.utils.clip_grad_norm_(self.params_mixer, self.args.grad_norm_clip)
         self.optimiser.step()
-        self.optimiser_diff.step()
 
         if (episode_num - self.last_target_update_episode) / self.args.target_update_interval >= 1.0:
             self._update_targets()
@@ -193,7 +164,6 @@ class QNAM_Learner:
             self.logger.log_stat("recon_loss", recon_loss.item(), t_env)
             self.logger.log_stat("entropy_loss", entropy_loss.item(), t_env)
             self.logger.log_stat("grad_norm", grad_norm, t_env)
-            self.logger.log_stat("grad_norm_diff", grad_norm_diff, t_env)
             mask_elems = mask.sum().item()
             self.logger.log_stat("td_error_abs", (masked_td_error.abs().sum().item()/mask_elems), t_env)
             self.logger.log_stat("q_taken_mean", (chosen_action_qvals * mask).sum().item()/(mask_elems * self.args.n_agents), t_env)
@@ -220,7 +190,6 @@ class QNAM_Learner:
         if self.mixer is not None:
             th.save(self.mixer.state_dict(), "{}/mixer.th".format(path))
         th.save(self.optimiser.state_dict(), "{}/opt.th".format(path))
-        th.save(self.optimiser_diff.state_dict(), "{}/opt_mix.th".format(path))
         th.save(self.eval_diff_network.state_dict(),
                 "{}/vae.th".format(path))
 
@@ -239,8 +208,6 @@ class QNAM_Learner:
             th.load("{}/vae.th".format(path), map_location=lambda storage, loc: storage))
         self.optimiser.load_state_dict(
             th.load("{}/opt.th".format(path), map_location=lambda storage, loc: storage))
-        self.optimiser_diff.load_state_dict(
-            th.load("{}/opt_mix.th".format(path), map_location=lambda storage, loc: storage))
 
     def vis_tool(self, obs, recon, input_var_here, agent=0):
         # fig fist plt

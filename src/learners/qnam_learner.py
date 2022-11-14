@@ -7,7 +7,7 @@ from components.episode_buffer import EpisodeBatch
 from modules.mixers.qnam import QNAMer
 from modules.intrinsic.qnam_context import VAE
 from torch.optim import RMSprop, Adam
-from utils.rl_utils import build_td_lambda_targets, build_q_lambda_targets
+from utils.rl_utils import build_td_lambda_targets
 import matplotlib.pyplot as plt
 import time
 

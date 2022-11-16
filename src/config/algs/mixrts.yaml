@@ -4,7 +4,7 @@
 action_selector: "epsilon_greedy"
 epsilon_start: 1.0
 epsilon_finish: 0.05
-epsilon_anneal_time: 100000 # 500000 for 6h_vs_8z
+epsilon_anneal_time: 50000 # 500000 for 6h_vs_8z
 
 runner: "episode"
 
@@ -15,7 +15,7 @@ target_update_interval: 200
 
 # use the Q_Learner to train
 agent_output_type: "q"
-learner: "q_learner"
+learner: "mixrts_learner"
 double_q: True
 
 agent: "rtcs" # Default rnn agent
@@ -28,5 +28,7 @@ mix_q_tree_depth: 3
 kernel: "dot" # dot/add
 softmax_w: True
 beta: 0
+burn_in_period: 100
+td_lambda: 0.6
 
 name: "mixrts"

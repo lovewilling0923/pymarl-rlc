@@ -24,7 +24,43 @@ map_param_registry = {
         "unit_type_bits": 2,
         "map_type": "overload_roach"
     },
-        "bane_vs_hM": {
+    "5s10z": {
+        "n_agents": 15,
+        "n_enemies": 15,
+        "limit": 200,
+        "a_race": "P",
+        "b_race": "P",
+        "unit_type_bits": 2,
+        "map_type": "stalkers_and_zealots",
+    },
+    "7sz": {
+        "n_agents": 14,
+        "n_enemies": 14,
+        "limit": 200,
+        "a_race": "P",
+        "b_race": "P",
+        "unit_type_bits": 2,
+        "map_type": "stalkers_and_zealots",
+    },
+    "1c3s5z_vs_1c3s6z": {
+        "n_agents": 9,
+        "n_enemies": 10,
+        "limit": 150,
+        "a_race": "P",
+        "b_race": "P",
+        "unit_type_bits": 3,
+        "map_type": "colossi_stalkers_zealots",
+    },
+    "1c3s8z_vs_1c3s9z": {
+        "n_agents": 12,
+        "n_enemies": 13,
+        "limit": 180,
+        "a_race": "P",
+        "b_race": "P",
+        "unit_type_bits": 3,
+        "map_type": "colossi_stalkers_zealots",
+    },
+    "bane_vs_hM": {
         "n_agents": 3,
         "n_enemies": 2,
         "limit": 30,
@@ -34,7 +70,6 @@ map_param_registry = {
         "map_type": "bZ_hM"
     }
 }
-
 
 smac_maps.map_param_registry.update(map_param_registry)
 

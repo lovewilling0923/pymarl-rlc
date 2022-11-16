@@ -37,9 +37,16 @@ map_dict = {
     "1c3s5z":{"ally_num":9,"enemy_num":9},
     "MMM":{"ally_num":10,"enemy_num":10},
     "MMM2":{"ally_num":10,"enemy_num":12},
+    "7sz":{"ally_num":14,"enemy_num":14},
+    "5s10z":{"ally_num":15,"enemy_num":15},
+    "1c3s5z_vs_1c3s6z":{"ally_num":9,"enemy_num":10},
+    "1c3s8z_vs_1c3s9z":{"ally_num":12,"enemy_num":13},
     "pp-2":{"ally_num":8,"enemy_num":8},
     "pp-1":{"ally_num":8,"enemy_num":8},
     "pp-0.5":{"ally_num":8,"enemy_num":8},
+    "lbf-4-2":{"ally_num":4,"enemy_num":4},
+    "lbf-4-4":{"ally_num":4,"enemy_num":4},
+    "lbf-3-3":{"ally_num":3,"enemy_num":3},
 }
 
 
@@ -134,14 +141,15 @@ def run_sequential(args, logger):
     args.obs_shape = env_info["obs_shape"]
     if 'sc2' in args.env:
         args.unit_dim = runner.env.shield_bits_ally + runner.env.unit_type_bits + 4
-    elif '' in args.env:
+    elif 'stag_hunt' in args.env:
         args.unit_dim = runner.env.x_max * runner.env.y_max
+    elif 'foraging' in args.env:
+        args.unit_dim = 0
     print("args.state_shape: ", args.state_shape)
     print("args.obs_shape: ", args.obs_shape)
     print("args.n_actions: ", args.n_actions)
     print("args.n_agents: ", args.n_agents)
     print("args.unit_dim: ", args.unit_dim)
-
 
     # Default/Base scheme
     scheme = {
@@ -160,6 +168,7 @@ def run_sequential(args, logger):
     }
 
     buffer = ReplayBuffer(scheme, groups, args.buffer_size, env_info["episode_limit"] + 1,
+                          burn_in_period=args.burn_in_period,
                           preprocess=preprocess,
                           device="cpu" if args.buffer_cpu_only else args.device)
 

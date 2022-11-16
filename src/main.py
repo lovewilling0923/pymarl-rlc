@@ -78,6 +78,7 @@ def parse_command(params, key, default):
             break
     return result
 
+
 if __name__ == '__main__':
     params = deepcopy(sys.argv)
     th.set_num_threads(1)

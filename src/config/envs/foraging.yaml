@@ -2,9 +2,9 @@ env: foraging
 
 env_args:
   field_size: 10
-  players: 4
-  map_name: "lbf-4-2"
-  max_food: 2
+  players: 3
+  map_name: "lbf-3-3"
+  max_food: 3
   force_coop: False
   partially_observe: True
   sight: 2

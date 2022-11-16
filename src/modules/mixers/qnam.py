@@ -145,7 +145,7 @@ class ConceptInteractionModule(nn.Module):
 
 class QNAMer(nn.Module):
     def __init__(self, args, nary=[1, 2], kernel="linear",
-                 hidden_dims=[8, 8, 8],
+                 hidden_dims=[32, 16],
                  dropout=0.0, batchnorm=False):
         super(QNAMer, self).__init__()
         self._num_subnets = 1

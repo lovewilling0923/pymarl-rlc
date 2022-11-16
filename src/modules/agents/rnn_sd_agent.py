@@ -19,11 +19,7 @@ class RNN_SD_Agent(nn.Module):
         )
         self.fc2 = nn.Linear(args.rnn_hidden_dim, args.n_actions)
 
-        self.mlp = nn.ModuleList([nn.Sequential(
-            nn.Linear(args.rnn_hidden_dim, args.rnn_hidden_dim * 4),
-            nn.ReLU(),
-            nn.Linear(args.rnn_hidden_dim * 4, args.n_actions),
-        ) for _ in range(self.n_agents)])
+        self.mlp = nn.ModuleList([nn.Linear(args.rnn_hidden_dim, args.n_actions) for _ in range(self.n_agents)])
 
     def init_hidden(self):
         # make hidden states on same device as model
@@ -39,10 +35,9 @@ class RNN_SD_Agent(nn.Module):
         if len(input_shape) == 2:
             x = F.relu(self.fc1(inputs))
             x = x.unsqueeze(1)
-
             #h_in = hidden_state.reshape(-1, self.args.rnn_hidden_dim)
             gru_out, _ = self.rnn(x, hidden_state)
-            local_q = torch.stack([mlp(x[id, :, :]) for id, mlp in enumerate(self.mlp)], dim=1)
+            local_q = torch.stack([mlp(gru_out[id, :, :]) for id, mlp in enumerate(self.mlp)], dim=1)
             local_q = local_q.squeeze()
 
             gru_out = gru_out.squeeze()
@@ -63,10 +58,10 @@ class RNN_SD_Agent(nn.Module):
             q = q.reshape(-1, gru_out.shape[1], q.shape[-1])
             q = q.reshape(-1, input_shape[1], q.shape[-2], q.shape[-1]).permute(0, 2, 1, 3)
 
-            mlp_inp_local = x.reshape(-1, input_shape[1], gru_out.shape[-2], gru_out.shape[-1])
-            local_q = torch.stack([mlp(mlp_inp_local[:, id].reshape(-1, mlp_inp_local.shape[-1])) for id, mlp in enumerate(self.mlp)],
+            gru_out_local = gru_out.reshape(-1, input_shape[1], gru_out.shape[-2], gru_out.shape[-1])
+            local_q = torch.stack([mlp(gru_out_local[:, id].reshape(-1, gru_out_local.shape[-1])) for id, mlp in enumerate(self.mlp)],
                                   dim=1)
-            local_q = local_q.reshape(-1, mlp_inp_local.shape[-2], local_q.shape[-2], local_q.shape[-1])
+            local_q = local_q.reshape(-1, gru_out_local.shape[-2], local_q.shape[-2], local_q.shape[-1])
 
             q = q + local_q
 

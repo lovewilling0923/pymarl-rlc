@@ -19,7 +19,8 @@ colors_map = {
 }
 
 _term = 'win_rates'    # win_rates or episode_rewards
-algs = ['vdn', 'qmix']#, 'qnam', 'qtran', 'shaq', 'qtran', 'qplex', 'ow_qmix', 'cw_qmix', 'cds', 'qnam'
+algs = ['vdn', 'qmix', 'qtran', 'qplex', 'ow_qmix', 'cw_qmix', 'cds', 'shaq', 'qnam']
+# algs = ['vdn', 'qmix', 'ow_qmix', 'cds', 'qnam']
 q_tree_depth = 3
 mix_q_tree_depth = 3
 beta = 0
@@ -27,7 +28,7 @@ beta = 0
 def get_num(map):
     load_num = 100
     return load_num
-nums = 5
+nums = 2
 
 
 def smooth(y, radius, mode='two_sided', valid_only=False):
@@ -240,7 +241,7 @@ def plt_term_mean(smac_map, load_num, files, i, j):
 
 
 if __name__ == '__main__':
-    smac_maps = ['lbf-4-2', 'lbf-4-4']
+    smac_maps = ['lbf-3-3']
     ax = plt.figure(figsize=(16, 3), dpi=400)
     Grid = plt.GridSpec(1, 3, wspace=0.2, hspace=0.4)
     plt.rcParams.update({'font.size': 15})

@@ -46,5 +46,5 @@ n_constrant_value: 32
 type: "weighted"
 agent_own_state_size: True
 
-name: "qamix"
+name: "qamix-h"
 

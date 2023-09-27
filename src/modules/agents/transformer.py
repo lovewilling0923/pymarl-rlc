@@ -26,7 +26,7 @@ class TransformerAggregationAgent(nn.Module):
         # q_agg = torch.mean(outputs, 1)
         self.h = self.q_trans(outputs)
         q = self.q_linear(self.h)
-
+        self.h = h
         return q, h
     def get_agent_h(self):
         return self.h

@@ -59,7 +59,7 @@ class QAMixer(nn.Module):
         q_lambda_list = []
         for i in range(self.n_attention_head):
             state_embedding = self.query_embedding_layers[i](states)
-            u_embedding = us#self.key_embedding_layers[i](us)
+            u_embedding = self.key_embedding_layers[i](us)
 
             # shape: [-1, 1, state_dim]
             state_embedding = state_embedding.reshape(-1, 1, self.n_query_embedding_layer2)

@@ -1,5 +1,4 @@
-# --- Qatten specific parameters ---
-
+# --- UNST-QMIX specific parameters ---
 
 # use epsilon greedy action selector
 action_selector: "epsilon_greedy"
@@ -25,10 +24,11 @@ obs_individual_obs: False
 standardise_returns: False
 standardise_rewards: True
 
+
 agent_output_type: "q"
 learner: "qamix_learner"
 double_q: True
-mixer: "qamix"
+mixer: "qmix"
 use_rnn: True
 mixing_embed_dim: 32
 hypernet_layers: 2
@@ -46,5 +46,4 @@ n_constrant_value: 32
 type: "weighted"
 agent_own_state_size: True
 
-name: "qamix"
-
+name: "unsr-qmix"

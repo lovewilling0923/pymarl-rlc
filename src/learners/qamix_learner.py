@@ -17,7 +17,7 @@ class QamixLearner:
 
         self.params = list(mac.parameters())
         self.last_target_update_episode = 0
-
+        args.input_shape = self.mac.input_shape
         self.mixer = None
         if args.mixer is not None:
             if args.mixer == "vdn":

@@ -33,7 +33,7 @@ class QAMixer(nn.Module):
         
         self.key_embedding_layers = nn.ModuleList()
         for i in range(self.n_attention_head):
-            self.key_embedding_layers.append(nn.Linear(self.u_dim, self.n_key_embedding_layer1))
+            self.key_embedding_layers.append(nn.Linear(self.args.input_shape, self.n_key_embedding_layer1))
 
 
         self.scaled_product_value = np.sqrt(args.n_query_embedding_layer2)
@@ -53,13 +53,14 @@ class QAMixer(nn.Module):
         # print(utility.size())
         bs = agent_qs.size(0)
         states = states.reshape(-1, self.state_dim)
-        us = utility.reshape(-1,self.u_dim)
+   
+        us = utility.reshape(-1,self.args.input_shape)
         agent_qs = agent_qs.view(-1, 1, self.n_agents)
 
         q_lambda_list = []
         for i in range(self.n_attention_head):
             state_embedding = self.query_embedding_layers[i](states)
-            u_embedding = us#self.key_embedding_layers[i](us)
+            u_embedding = self.key_embedding_layers[i](us)
 
             # shape: [-1, 1, state_dim]
             state_embedding = state_embedding.reshape(-1, 1, self.n_query_embedding_layer2)

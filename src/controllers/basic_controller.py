@@ -9,6 +9,7 @@ class BasicMAC:
         self.n_agents = args.n_agents
         self.args = args
         input_shape = self._get_input_shape(scheme)
+        self.input_shape = self._get_input_shape(scheme)
         self.args.token_dim = input_shape//(self.args.enemy_num+self.args.ally_num)
         self._build_agents(input_shape)
         self.agent_output_type = args.agent_output_type
@@ -62,7 +63,8 @@ class BasicMAC:
             agent_outs, self.hidden_states = self.agent(agent_inputs,
                                                             self.hidden_states.reshape(-1, 1, self.args.emb),
                                                             self.args.enemy_num, self.args.ally_num)
-            self.h = self.agent.get_agent_h()
+            
+            self.h = agent_inputs
 
         return agent_outs.view(ep_batch.batch_size, self.n_agents, -1)
 
